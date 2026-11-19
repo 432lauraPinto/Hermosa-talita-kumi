@@ -1,0 +1,98 @@
+{
+  "name": "05 - Seguimiento Inteligente y Cálculo de Próxima Sesión",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calcular-seguimiento",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-seguimiento",
+      "name": "Webhook Seguimiento Inteligente",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT th.*, u.name as client_name FROM treatment_history th JOIN clients c ON th.client_id = c.id JOIN users u ON c.user_id = u.id WHERE th.client_id = {{$json.body.clientId}} ORDER BY th.date DESC LIMIT 1"
+      },
+      "id": "node-mysql-ultimo-tratamiento",
+      "name": "MySQL - Obtener Último Tratamiento",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT recommended_interval, interval_unit, description FROM treatment_rules WHERE treatment_name = '{{$json.treatment_name}}' AND active = 1 LIMIT 1"
+      },
+      "id": "node-mysql-buscar-regla",
+      "name": "MySQL - Buscar Regla de Frecuencia",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [660, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ultTratamiento = $('MySQL - Obtener Último Tratamiento').first().json;\nconst reglaRows = $input.all();\nconst regla = reglaRows.length > 0 ? reglaRows[0].json : { recommended_interval: 15, interval_unit: 'DIAS', description: 'Intervalo estándar' };\n\nconst fechaSesion = new Date(ultTratamiento.date);\nconst proxFecha = new Date(fechaSesion);\n\nif (regla.interval_unit === 'DIAS') {\n  proxFecha.setDate(proxFecha.getDate() + regla.recommended_interval);\n} else if (regla.interval_unit === 'SEMANAS') {\n  proxFecha.setDate(proxFecha.getDate() + (regla.recommended_interval * 7));\n} else if (regla.interval_unit === 'MESES') {\n  proxFecha.setMonth(proxFecha.getMonth() + regla.recommended_interval);\n}\n\nconst proxFechaStr = proxFecha.toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    success: true,\n    cliente: ultTratamiento.client_name,\n    ultimoTratamiento: ultTratamiento.treatment_name,\n    fechaUltima: ultTratamiento.date,\n    intervalo: `${regla.recommended_interval} ${regla.interval_unit.toLowerCase()}`,\n    proximaSesionCalculada: proxFechaStr,\n    mensajeRecomendacion: `Tu última sesión de ${ultTratamiento.treatment_name} fue el ${ultTratamiento.date}. Según la frecuencia configurada para este tratamiento (${regla.recommended_interval} ${regla.interval_unit.toLowerCase()}), tu siguiente sesión corresponde el ${proxFechaStr}. ¿Deseas agendarla ahora?`\n  }\n}];"
+      },
+      "id": "node-code-calculo-matematico",
+      "name": "Calcular Fecha de Regla",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Seguimiento Inteligente": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Obtener Último Tratamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Obtener Último Tratamiento": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Buscar Regla de Frecuencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Buscar Regla de Frecuencia": {
+      "main": [
+        [
+          {
+            "node": "Calcular Fecha de Regla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

@@ -1,0 +1,74 @@
+{
+  "name": "06 - Recordatorio Automático Programado de Citas",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-cron-diario",
+      "name": "Cron Diario 08:00 AM",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT a.id, a.date, a.time, s.name as servicio, u.name as cliente, u.email, u.phone FROM appointments a JOIN services s ON a.service_id = s.id JOIN clients c ON a.client_id = c.id JOIN users u ON c.user_id = u.id WHERE a.date = DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND a.status IN ('PENDIENTE', 'CONFIRMADA')"
+      },
+      "id": "node-mysql-citas-manana",
+      "name": "MySQL - Consultar Citas de Mañana",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const citas = $input.all().map(i => i.json);\nconsole.log(`[RECORDATORIO] Se generaron ${citas.length} recordatorios para citas programadas para el día de mañana.`);\nreturn citas.map(c => ({\n  json: {\n    cliente: c.cliente,\n    email: c.email,\n    telefono: c.phone,\n    servicio: c.servicio,\n    fecha: c.date,\n    hora: c.time,\n    mensaje: `Estimado/a ${c.cliente}, te recordamos tu cita de \"${c.servicio}\" mañana a las ${c.time} en Centro Estético Aura. Por favor llega 10 minutos antes.`\n  }\n}));"
+      },
+      "id": "node-code-generar-mensajes",
+      "name": "Generar Mensajes de Recordatorio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    }
+  ],
+  "connections": {
+    "Cron Diario 08:00 AM": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Consultar Citas de Mañana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Consultar Citas de Mañana": {
+      "main": [
+        [
+          {
+            "node": "Generar Mensajes de Recordatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

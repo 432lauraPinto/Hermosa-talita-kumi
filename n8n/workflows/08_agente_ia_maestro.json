@@ -1,0 +1,145 @@
+{
+  "name": "08 - Agente de Inteligencia Artificial Maestro (OpenAI + Tools)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-ia",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-chat",
+      "name": "Webhook Chat Entrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.body.message}}",
+        "options": {
+          "systemMessage": "Eres Aura, el agente conversacional inteligente del Centro Estético Facial y Corporal.\nTu misión es brindar atención cálida, profesional y precisa a pacientes y visitantes.\n\nREGLAS OBLIGATORIAS:\n1. NUNCA inventes fechas ni hagas diagnósticos médicos (no digas 'tu piel necesita...', 'tienes esta enfermedad...').\n2. Para fechas de próximas sesiones o seguimiento, SIEMPRE utiliza la herramienta 'consultar_proxima_sesion'.\n3. Si el usuario pregunta por sus citas, productos registrados, historial o pagos, utiliza las herramientas autorizadas correspondientes pasando su clientId autenticado.\n4. Si el usuario no está autenticado y pide información personal, pídele cordialmente que inicie sesión en la plataforma.\n5. Tus respuestas deben ser elegantes, concisas y orientadas al bienestar estético."
+        }
+      },
+      "id": "node-ai-agent",
+      "name": "AI Agent Maestro",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "node-openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [460, 520],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-cred-estetica",
+          "name": "OpenAI API Estetica"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "consultar_servicios",
+        "description": "Consulta el catálogo de tratamientos faciales y corporales, precios, duración y categoría.",
+        "workflowId": "node-webhook-servicios"
+      },
+      "id": "tool-servicios",
+      "name": "Tool Servicios",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [680, 440]
+    },
+    {
+      "parameters": {
+        "name": "consultar_proxima_sesion",
+        "description": "Calcula matemáticamente la próxima sesión del cliente basándose en su último tratamiento y las reglas de frecuencia configuradas.",
+        "workflowId": "node-webhook-seguimiento"
+      },
+      "id": "tool-seguimiento",
+      "name": "Tool Seguimiento",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [680, 560]
+    },
+    {
+      "parameters": {
+        "name": "consultar_pagos",
+        "description": "Consulta los saldos pendientes y pagos realizados del cliente autenticado.",
+        "workflowId": "node-webhook-pagos"
+      },
+      "id": "tool-pagos",
+      "name": "Tool Pagos",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [680, 680]
+    }
+  ],
+  "connections": {
+    "Webhook Chat Entrada": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Maestro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Maestro",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool Servicios": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Maestro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool Seguimiento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Maestro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool Pagos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Maestro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

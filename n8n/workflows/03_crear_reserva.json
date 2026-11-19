@@ -1,0 +1,144 @@
+{
+  "name": "03 - Crear Reserva con Verificación de Disponibilidad",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-reserva",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-reserva",
+      "name": "Webhook Crear Reserva",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM appointments WHERE date = '{{$json.body.fecha}}' AND time = '{{$json.body.hora}}' AND status IN ('PENDIENTE', 'CONFIRMADA')"
+      },
+      "id": "node-mysql-check-disponibilidad",
+      "name": "MySQL - Verificar Conflicto Horario",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$input.all().length}}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "node-if-disponible",
+      "name": "Disponibilidad Libre?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO appointments (client_id, service_id, date, time, status, observations) VALUES ({{$('Webhook Crear Reserva').first().json.body.clientId}}, {{$('Webhook Crear Reserva').first().json.body.servicioId}}, '{{$('Webhook Crear Reserva').first().json.body.fecha}}', '{{$('Webhook Crear Reserva').first().json.body.hora}}', 'PENDIENTE', '{{$('Webhook Crear Reserva').first().json.body.observaciones || 'Creada vía n8n'}}')"
+      },
+      "id": "node-mysql-insert-reserva",
+      "name": "MySQL - Insertar Cita",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [880, 200],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: true,\n    mensaje: 'Tu cita ha sido registrada exitosamente en estado PENDIENTE.',\n    fecha: $('Webhook Crear Reserva').first().json.body.fecha,\n    hora: $('Webhook Crear Reserva').first().json.body.hora\n  }\n}];"
+      },
+      "id": "node-code-exito",
+      "name": "Respuesta Reserva Exitosa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: false,\n    error: 'El horario seleccionado ya se encuentra ocupado por otra cita. Por favor selecciona otro horario o fecha.'\n  }\n}];"
+      },
+      "id": "node-code-conflicto",
+      "name": "Respuesta Horario Ocupado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Crear Reserva": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Verificar Conflicto Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Verificar Conflicto Horario": {
+      "main": [
+        [
+          {
+            "node": "Disponibilidad Libre?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disponibilidad Libre?": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Insertar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Horario Ocupado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Insertar Cita": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Reserva Exitosa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

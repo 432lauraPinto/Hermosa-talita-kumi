@@ -1,0 +1,70 @@
+{
+  "name": "02 - Consulta de Historial de Tratamientos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consultar-historial",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-historial",
+      "name": "Webhook Consulta Historial",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT th.id, th.treatment_name, th.treatment_type, th.date, th.professional, th.suggested_next_session, th.observations, th.status FROM treatment_history th WHERE th.client_id = {{$json.body.clientId}} ORDER BY th.date DESC"
+      },
+      "id": "node-mysql-historial",
+      "name": "MySQL - Consultar Historial Cliente",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nreturn [{\n  json: {\n    success: true,\n    clientId: $('Webhook Consulta Historial').first().json.body.clientId,\n    totalSesiones: items.length,\n    historial: items,\n    resumenTexto: items.length === 0 \n      ? 'Aún no registras sesiones previas de tratamientos.' \n      : `Cuentas con ${items.length} sesión(es) registrada(s). Tu último tratamiento fue ${items[0].treatment_name} el ${items[0].date}.`\n  }\n}];"
+      },
+      "id": "node-code-formato-historial",
+      "name": "Formatear Historial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Consulta Historial": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Consultar Historial Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Consultar Historial Cliente": {
+      "main": [
+        [
+          {
+            "node": "Formatear Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

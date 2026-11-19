@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /encargado
+Disallow: /encargado/*
+Disallow: /api/
+
+Sitemap: https://hermosatalitakumi.com/sitemap.xml

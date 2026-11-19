@@ -1,0 +1,144 @@
+{
+  "name": "04 - Cancelación Segura de Reserva",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cancelar-reserva",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-cancelar",
+      "name": "Webhook Cancelar Cita",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, status FROM appointments WHERE id = {{$json.body.appointmentId}} AND client_id = {{$json.body.clientId}}"
+      },
+      "id": "node-mysql-verificar-propietario",
+      "name": "MySQL - Verificar Pertenencia de Reserva",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$input.all().length}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "node-if-existe",
+      "name": "Existe y Pertenece?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE appointments SET status = 'CANCELADA' WHERE id = {{$('Webhook Cancelar Cita').first().json.body.appointmentId}}"
+      },
+      "id": "node-mysql-update-cancelar",
+      "name": "MySQL - Marcar Cancelada",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [880, 200],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: true,\n    mensaje: `La cita #${$('Webhook Cancelar Cita').first().json.body.appointmentId} ha sido cancelada correctamente.`\n  }\n}];"
+      },
+      "id": "node-code-res-cancelada",
+      "name": "Respuesta Cancelación Exitosa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: false,\n    error: 'La reserva no fue encontrada o no pertenece a la cuenta autenticada.'\n  }\n}];"
+      },
+      "id": "node-code-error-no-autorizado",
+      "name": "Respuesta No Autorizado / No Existe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Cancelar Cita": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Verificar Pertenencia de Reserva",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Verificar Pertenencia de Reserva": {
+      "main": [
+        [
+          {
+            "node": "Existe y Pertenece?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Existe y Pertenece?": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Marcar Cancelada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta No Autorizado / No Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Marcar Cancelada": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Cancelación Exitosa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

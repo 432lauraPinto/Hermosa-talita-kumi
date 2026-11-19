@@ -1,0 +1,70 @@
+{
+  "name": "07 - Consulta de Pagos y Saldos de Clientes",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consultar-pagos",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-pagos",
+      "name": "Webhook Consulta Pagos",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT p.*, u.name as client_name FROM payments p JOIN clients c ON p.client_id = c.id JOIN users u ON c.user_id = u.id WHERE p.client_id = {{$json.body.clientId}} ORDER BY p.payment_date DESC"
+      },
+      "id": "node-mysql-pagos",
+      "name": "MySQL - Consultar Pagos de Cliente",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pagos = $input.all().map(i => i.json);\nlet totalMonto = 0;\nlet totalAbonado = 0;\nlet totalSaldo = 0;\n\npagos.forEach(p => {\n  totalMonto += Number(p.total_amount) || 0;\n  totalAbonado += Number(p.paid_amount) || 0;\n  totalSaldo += Number(p.pending_balance) || 0;\n});\n\nconst ultimoPago = pagos.length > 0 ? pagos[0] : null;\n\nreturn [{\n  json: {\n    success: true,\n    totalPagos: pagos.length,\n    montoTotalServicios: `$${totalMonto.toFixed(2)}`,\n    montoPagado: `$${totalAbonado.toFixed(2)}`,\n    saldoPendiente: `$${totalSaldo.toFixed(2)}`,\n    fechaUltimoPago: ultimoPago ? ultimoPago.payment_date : 'Sin pagos registrados',\n    mensajeChat: `Tu estado de cuenta refleja un total facturado de $${totalMonto.toFixed(2)}, total pagado de $${totalAbonado.toFixed(2)} y un saldo pendiente de $${totalSaldo.toFixed(2)}. Fecha de tu último movimiento: ${ultimoPago ? ultimoPago.payment_date : 'N/A'}.`,\n    historialPagos: pagos\n  }\n}];"
+      },
+      "id": "node-code-calcular-pagos",
+      "name": "Calcular Resumen de Pagos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Consulta Pagos": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Consultar Pagos de Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Consultar Pagos de Cliente": {
+      "main": [
+        [
+          {
+            "node": "Calcular Resumen de Pagos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

@@ -1,0 +1,70 @@
+{
+  "name": "01 - Consulta de Servicios Estéticos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consultar-servicios",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook-servicios",
+      "name": "Webhook Consulta Servicios",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name, description, category, price, duration, type, status, image FROM services WHERE status = 'ACTIVO' ORDER BY type ASC, name ASC"
+      },
+      "id": "node-mysql-servicios",
+      "name": "MySQL - Consultar Servicios Activos",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.1,
+      "position": [440, 300],
+      "credentials": {
+        "mySql": {
+          "id": "mysql-cred-estetica",
+          "name": "MySQL Estetica DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const servicios = $input.all().map(item => item.json);\nreturn [{\n  json: {\n    success: true,\n    total: servicios.length,\n    servicios: servicios,\n    mensaje: `Se encontraron ${servicios.length} tratamientos faciales y corporales activos.`\n  }\n}];"
+      },
+      "id": "node-code-formato-servicios",
+      "name": "Formatear Respuesta Servicios",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Consulta Servicios": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Consultar Servicios Activos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Consultar Servicios Activos": {
+      "main": [
+        [
+          {
+            "node": "Formatear Respuesta Servicios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}
