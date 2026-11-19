@@ -106,7 +106,7 @@ async function createService(req, res) {
         parseInt(duration, 10),
         type || catCode,
         status || 'ACTIVO',
-        image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'
+        image || '/trat_limpieza_facial.png'
       ]
     );
 

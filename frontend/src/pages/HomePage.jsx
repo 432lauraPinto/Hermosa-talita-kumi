@@ -538,9 +538,10 @@ export default function HomePage({ onNavigate }) {
               >
                 <div style={{ height: '210px', position: 'relative', overflow: 'hidden' }}>
                   <img
-                    src={promo.image || '/banner-rosa.jpg'}
+                    src={promo.image || '/promo_bano_luna_facial.png'}
                     alt={promo.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = '/promo_bano_luna_facial.png'; }}
                   />
                   <div style={{
                     position: 'absolute',
@@ -659,9 +660,10 @@ export default function HomePage({ onNavigate }) {
               >
                 <div style={{ height: '175px', overflow: 'hidden' }}>
                   <img
-                    src={cat.image || '/banner-rosa.jpg'}
+                    src={cat.image || '/cat_facial.png'}
                     alt={cat.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = '/cat_facial.png'; }}
                   />
                 </div>
                 <div style={{ padding: '1.35rem' }}>
@@ -815,32 +817,84 @@ export default function HomePage({ onNavigate }) {
       </section>
 
       {/* =====================================================================
-          6. SECCIÓN: 8 RAZONES PARA ELEGIR HERMOSA TALITA KUMI
+          6. SECCIÓN: 8 RAZONES PARA ELEGIR HERMOSA TALITA KUMI (MÓDULO 08)
          ===================================================================== */}
       <section style={{
-        padding: '4rem 1.5rem',
+        padding: '4.5rem 1.5rem',
         backgroundColor: '#FFFFFF',
         borderTop: '1px solid #F6C6D3'
       }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: '2.1rem',
-              color: '#C46A86',
-              margin: '0 0 0.5rem 0'
-            }}>
-              ¿Por qué elegir Hermosa Talita Kumi?
-            </h2>
-            <p style={{ color: '#666666', fontSize: '0.98rem' }}>
-              Nos esforzamos por ofrecerte una atención cálida, profesional y con valores cristianos en cada visita.
-            </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            alignItems: 'center',
+            gap: '3rem',
+            marginBottom: '3rem'
+          }}>
+            {/* Texto y Presentación Inspiradora */}
+            <div>
+              <div style={{ color: '#B8860B', fontWeight: '800', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
+                Excelencia & Vocación de Servicio
+              </div>
+              <h2 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: '2.3rem',
+                color: '#C46A86',
+                margin: '0 0 1rem 0',
+                lineHeight: 1.25
+              }}>
+                ¿Por qué elegir Hermosa Talita Kumi?
+              </h2>
+              <p style={{ color: '#555555', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                Nos esforzamos por ofrecerte una atención cálida, profesional y con valores cristianos en cada visita.
+                Cada sesión en nuestras 4 sucursales de La Paz y El Alto es un espacio diseñado para tu bienestar, 
+                descanso y renovación integral.
+              </p>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                backgroundColor: 'rgba(253, 246, 248, 0.8)',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '30px',
+                border: '1px solid #F6C6D3',
+                color: '#C46A86',
+                fontWeight: '700',
+                fontSize: '0.9rem'
+              }}>
+                <HeartHandshake size={18} color="#B8860B" />
+                Atención personalizada con calidez y dignidad
+              </div>
+            </div>
+
+            {/* Fotografía Libre (Módulo 08: sin marco, recuadro, borde ni sombra) */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 0, boxShadow: 'none' }}>
+              <picture>
+                <source srcSet="/elegirnos_spa_bienestar.webp" type="image/webp" />
+                <img
+                  src="/elegirnos_spa_bienestar.png"
+                  alt="Bienestar y Cuidado en Hermosa Talita Kumi"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    maxHeight: '360px',
+                    objectFit: 'contain',
+                    border: 'none',
+                    boxShadow: 'none',
+                    background: 'transparent'
+                  }}
+                  onError={(e) => { e.target.src = '/hero_chica_mascarilla_spa.png'; }}
+                />
+              </picture>
+            </div>
           </div>
 
+          {/* Grilla de las 8 Razones */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '1.75rem'
+            gap: '1.5rem'
           }}>
             {[
               { title: '4 Sucursales Oficiales', desc: 'Presencia en Villa Fátima, UPEA – El Alto, Ceja – El Alto y Max Paredes.' },
@@ -880,35 +934,6 @@ export default function HomePage({ onNavigate }) {
           </div>
         </div>
       </section>
-
-      {/* Botón Flotante de WhatsApp para la Sucursal Seleccionada */}
-      <a
-        href={getWhatsAppLink(selectedBranch)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-whatsapp-pulse"
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '84px',
-          zIndex: 999,
-          backgroundColor: '#25D366',
-          color: '#FFFFFF',
-          borderRadius: '50px',
-          padding: '0.75rem 1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          boxShadow: '0 8px 25px rgba(37, 211, 102, 0.45)',
-          textDecoration: 'none',
-          fontWeight: '800',
-          fontSize: '0.88rem'
-        }}
-        title={`Consultar por WhatsApp a ${selectedBranch?.name || 'la sucursal'}`}
-      >
-        <MessageCircle size={22} />
-        <span>WhatsApp ({selectedBranch?.name || 'Villa Fátima'})</span>
-      </a>
 
     </div>
   );

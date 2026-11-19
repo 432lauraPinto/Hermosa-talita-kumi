@@ -16,21 +16,21 @@ async function getHeroSlides(req, res) {
         id: 1,
         title: 'Cuidado y Belleza Integral',
         subtitle: 'Tratamientos Faciales y Corporales Personalizados',
-        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1200',
+        image: '/hero_chica_tratamiento_facial.png',
         active: 1
       },
       {
         id: 2,
         title: 'Baño de Luna Exclusivo',
         subtitle: 'Exfoliación, Luminosidad y Tersura para tu Piel',
-        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200',
+        image: '/hero_chica_mascarilla_spa.png',
         active: 1
       },
       {
         id: 3,
         title: 'Masajes y Relajación Dermo-Corporal',
         subtitle: 'Maderoterapia, Piedras Calientes y Aromaterapia Pura',
-        image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1200',
+        image: '/hero_chica_producto_serum.png',
         active: 1
       }
     ];

@@ -238,11 +238,11 @@ export default function ProductsPage({ onNavigate }) {
                     {/* Imagen del Producto */}
                     <div style={{ height: '220px', position: 'relative', overflow: 'hidden', backgroundColor: '#FFFDF9' }}>
                       <img
-                        src={product.image || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500'}
+                        src={product.image || '/prod_serum_facial.png'}
                         alt={product.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500';
+                          e.target.src = '/prod_serum_facial.png';
                         }}
                       />
                       <div style={{

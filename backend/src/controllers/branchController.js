@@ -70,7 +70,7 @@ async function createBranch(req, res) {
         opening_hours || 'Lunes a Sábado: 08:30 - 19:30',
         google_maps_url || '',
         map_embed_url || '',
-        image || 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600'
+        image || '/banner-rosa.jpg'
       ]
     );
 

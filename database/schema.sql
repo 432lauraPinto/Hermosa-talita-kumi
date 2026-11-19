@@ -877,15 +877,15 @@ SELECT id, 30, 2, 30, 4, 1 FROM sucursales
 ON DUPLICATE KEY UPDATE intervalo_minutos=30;
 
 -- 7 Categorías Oficiales de Servicios
-INSERT INTO categorias_servicios (id, codigo, nombre, descripcion, orden_visual, activo) VALUES
-(1, 'TRATAMIENTOS_FACIALES', 'Tratamientos faciales', 'Cuidado y limpieza dérmica orientada a mejorar la apariencia y luminosidad de la piel.', 1, 1),
-(2, 'BANO_DE_LUNA', 'Baño de Luna', 'Exfoliación, luminosidad y cuidado integral de la piel corporal.', 2, 1),
-(3, 'CUIDADO_CORPORAL', 'Cuidado corporal', 'Tratamientos y envolturas corporales para tersura, firmeza e hidratación dérmica.', 3, 1),
-(4, 'MASAJES_CORPORALES', 'Masajes corporales', 'Técnicas de relajación muscular y bienestar corporal en ambiente de descanso.', 4, 1),
-(5, 'DEPILACION_FACIAL_CORPORAL', 'Depilación facial y corporal', 'Depilación cosmética dermo-suave para zonas faciales y corporales.', 5, 1),
-(6, 'LIFTING_PESTANAS', 'Lifting de pestañas', 'Realce cosmético y curvatura natural de pestañas con productos delicados.', 6, 1),
-(7, 'PERFILADO_CEJAS', 'Perfilado de cejas', 'Diseño armónico y perfilado de cejas realizado por personal del centro.', 7, 1)
-ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
+INSERT INTO categorias_servicios (id, codigo, nombre, descripcion, imagen_url, orden_visual, activo) VALUES
+(1, 'TRATAMIENTOS_FACIALES', 'Tratamientos faciales', 'Cuidado y limpieza dérmica orientada a mejorar la apariencia y luminosidad de la piel.', '/cat_facial.png', 1, 1),
+(2, 'BANO_DE_LUNA', 'Baño de Luna', 'Exfoliación, luminosidad y cuidado integral de la piel corporal.', '/cat_luna.png', 2, 1),
+(3, 'CUIDADO_CORPORAL', 'Cuidado corporal', 'Tratamientos y envolturas corporales para tersura, firmeza e hidratación dérmica.', '/cat_corporal.png', 3, 1),
+(4, 'MASAJES_CORPORALES', 'Masajes corporales', 'Técnicas de relajación muscular y bienestar corporal en ambiente de descanso.', '/cat_masajes.png', 4, 1),
+(5, 'DEPILACION_FACIAL_CORPORAL', 'Depilación facial y corporal', 'Depilación cosmética dermo-suave para zonas faciales y corporales.', '/cat_depilacion.png', 5, 1),
+(6, 'LIFTING_PESTANAS', 'Lifting de pestañas', 'Realce cosmético y curvatura natural de pestañas con productos delicados.', '/cat_pestanas.png', 6, 1),
+(7, 'PERFILADO_CEJAS', 'Perfilado de cejas', 'Diseño armónico y perfilado de cejas realizado por personal del centro.', '/cat_cejas.png', 7, 1)
+ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), imagen_url=VALUES(imagen_url);
 
 -- Versículos Bíblicos del Módulo 08 (Texto provisional verificado RVR1960)
 INSERT INTO versiculos (id, referencia, version, texto, mensaje, orden, estado, es_provisional) VALUES

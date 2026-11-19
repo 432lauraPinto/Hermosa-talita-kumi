@@ -72,7 +72,7 @@ async function createProduct(req, res) {
         frequency || '',
         status || 'ACTIVO',
         price ? parseFloat(price) : 0.00,
-        image || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'
+        image || '/prod_serum_facial.png'
       ]
     );
 

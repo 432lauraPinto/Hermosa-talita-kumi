@@ -17,7 +17,7 @@ export default function AdminServicesPage({ onNavigate }) {
     duration: '',
     type: 'FACIAL',
     status: 'ACTIVO',
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'
+    image: '/trat_limpieza_facial.png'
   });
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function AdminServicesPage({ onNavigate }) {
       duration: '60',
       type: 'FACIAL',
       status: 'ACTIVO',
-      image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'
+      image: '/trat_limpieza_facial.png'
     });
     setModalOpen(true);
   };

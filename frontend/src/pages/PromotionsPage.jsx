@@ -122,7 +122,7 @@ export default function PromotionsPage({ onNavigate }) {
                     boxShadow: 'none'
                   }}>
                     <img
-                      src={promo.image || '/hero_chica_tratamiento_facial.png'}
+                      src={promo.image || '/promo_bano_luna_facial.png'}
                       alt={promo.title}
                       style={{
                         background: 'transparent',
@@ -134,7 +134,7 @@ export default function PromotionsPage({ onNavigate }) {
                         display: 'block'
                       }}
                       onError={(e) => {
-                        e.target.src = '/hero_chica_tratamiento_facial.png';
+                        e.target.src = '/promo_bano_luna_facial.png';
                       }}
                     />
                   </div>

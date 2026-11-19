@@ -419,8 +419,8 @@ async function initSqliteFallback() {
     (1, 'Directora General (Jefes)', 'admin@talitakumi.com', '$2a$10$1xKFnOg6c8tsPcQo/DqsGuksmKgp5Bl9ZdglzW5sh21uKvQ5wdUpe', 'ADMINISTRADOR', NULL, '+591 70011223', '/logo-talitakumi.jpg'),
     (2, 'Encargado La Paz (Villa Fátima / Max Paredes)', 'encargado.lapaz@talitakumi.com', '$2a$10$1xKFnOg6c8tsPcQo/DqsGuksmKgp5Bl9ZdglzW5sh21uKvQ5wdUpe', 'ENCARGADO', 1, '+591 77197857', '/logo-talitakumi.jpg'),
     (3, 'Encargado El Alto (UPEA / Ceja)', 'encargado.elalto@talitakumi.com', '$2a$10$1xKFnOg6c8tsPcQo/DqsGuksmKgp5Bl9ZdglzW5sh21uKvQ5wdUpe', 'ENCARGADO', 2, '+591 79688750', '/logo-talitakumi.jpg'),
-    (4, 'María González (Cliente)', 'maria.gonzalez@example.com', '$2a$10$4fkaZ9Zh2FSlDbh0hFSYW.am72gz9A4BZAIw.hIIOp7mKWzkiJZGK', 'CLIENTE', 1, '+591 71122334', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'),
-    (5, 'Cliente Demo', 'cliente@ejemplo.com', '$2a$10$4fkaZ9Zh2FSlDbh0hFSYW.am72gz9A4BZAIw.hIIOp7mKWzkiJZGK', 'CLIENTE', 1, '+591 72233445', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300');
+    (4, 'María González (Cliente)', 'maria.gonzalez@example.com', '$2a$10$4fkaZ9Zh2FSlDbh0hFSYW.am72gz9A4BZAIw.hIIOp7mKWzkiJZGK', 'CLIENTE', 1, '+591 71122334', '/logo-talitakumi.png'),
+    (5, 'Cliente Demo', 'cliente@ejemplo.com', '$2a$10$4fkaZ9Zh2FSlDbh0hFSYW.am72gz9A4BZAIw.hIIOp7mKWzkiJZGK', 'CLIENTE', 1, '+591 72233445', '/logo-talitakumi.png');
 
     INSERT OR IGNORE INTO clients (id, user_id, preferred_branch_id, birth_date, gender, skin_type) VALUES
     (1, 4, 1, '1995-04-12', 'Femenino', 'Mixta'),
@@ -428,80 +428,80 @@ async function initSqliteFallback() {
 
     -- 3. CATEGORÍAS DE SERVICIOS (7 Categorías)
     INSERT OR IGNORE INTO service_categories (id, code, name, description, image, sort_order) VALUES
-    (1, 'FACIAL', 'Tratamientos faciales', 'Cuidado, limpieza profunda y revitalización de la piel del rostro', 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600', 1),
-    (2, 'LUNA', 'Baño de Luna', 'Exfoliación corporal integral, luminosidad y nutrición dermo-cosmética', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600', 2),
-    (3, 'CORPORAL', 'Cuidado corporal', 'Tratamientos corporales reductores, reafirmantes e hidratantes', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600', 3),
-    (4, 'MASAJES', 'Masajes corporales', 'Técnicas de relajación muscular, maderoterapia y piedras calientes', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600', 4),
-    (5, 'DEPILACION', 'Depilación facial y corporal', 'Depilación cosmética profesional y suave para diversas zonas', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600', 5),
-    (6, 'PESTANAS', 'Lifting de pestañas', 'Realce natural, curvatura y nutrición profunda de pestañas', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600', 6),
-    (7, 'CEJAS', 'Perfilado de cejas', 'Diseño armónico, perfilado y definición estética de cejas', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600', 7);
+    (1, 'FACIAL', 'Tratamientos faciales', 'Cuidado, limpieza profunda y revitalización de la piel del rostro', '/cat_facial.png', 1),
+    (2, 'LUNA', 'Baño de Luna', 'Exfoliación corporal integral, luminosidad y nutrición dermo-cosmética', '/cat_luna.png', 2),
+    (3, 'CORPORAL', 'Cuidado corporal', 'Tratamientos corporales reductores, reafirmantes e hidratantes', '/cat_corporal.png', 3),
+    (4, 'MASAJES', 'Masajes corporales', 'Técnicas de relajación muscular, maderoterapia y piedras calientes', '/cat_masajes.png', 4),
+    (5, 'DEPILACION', 'Depilación facial y corporal', 'Depilación cosmética profesional y suave para diversas zonas', '/cat_depilacion.png', 5),
+    (6, 'PESTANAS', 'Lifting de pestañas', 'Realce natural, curvatura y nutrición profunda de pestañas', '/cat_pestanas.png', 6),
+    (7, 'CEJAS', 'Perfilado de cejas', 'Diseño armónico, perfilado y definición estética de cejas', '/cat_cejas.png', 7);
 
     -- 4. 51 TRATAMIENTOS OFICIALES (Precios en Bolivianos Bs)
     INSERT OR IGNORE INTO services (id, category_id, category_code, name, description, cosmetic_benefits, category, price, duration, type, status, image) VALUES
     -- 1. Faciales (10)
-    (1, 1, 'FACIAL', 'Limpieza facial básica', 'Higiene facial para retirar impurezas superficiales y tonificar el cutis.', 'Mejora la frescura y suavidad de la piel.', 'Tratamientos faciales', 120.00, 45, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'),
-    (2, 1, 'FACIAL', 'Limpieza facial profunda', 'Exfoliación, vapor de ozono y descongestión para poros limpios y luminosos.', 'Favorece la oxigenación dermo-cutánea.', 'Tratamientos faciales', 180.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
-    (3, 1, 'FACIAL', 'Limpieza facial con extracción de impurezas', 'Protocolo intensivo con espátula ultrasónica y extracción manual higiénica.', 'Purifica la textura cutánea y reduce brillo.', 'Tratamientos faciales', 200.00, 75, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600'),
-    (4, 1, 'FACIAL', 'Hidratación facial intensiva', 'Velo hidratante con ácido hialurónico y activos nutritivos.', 'Aporta elasticidad y sensación de confort.', 'Tratamientos faciales', 160.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (5, 1, 'FACIAL', 'Tratamiento facial iluminador', 'Aporte de brillo y revitalización cosmética para pieles fatigadas.', 'Uniforma el aspecto y devuelve vitalidad.', 'Tratamientos faciales', 190.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'),
-    (6, 1, 'FACIAL', 'Tratamiento antioxidante con vitamina C', 'Infusión tópica con extractos cítricos que protegen del estrés ambiental.', 'Sensación de luminosidad y frescura.', 'Tratamientos faciales', 210.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
-    (7, 1, 'FACIAL', 'Tratamiento para piel con acné', 'Protocolo cosmético calmante y seborregulador.', 'Contribuye a descongestionar zonas propensas a brotes.', 'Tratamientos faciales', 220.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600'),
-    (8, 1, 'FACIAL', 'Tratamiento para mejorar la apariencia de manchas', 'Aplicación de sueros botánicos aclarantes y mascarilla regeneradora.', 'Atenúa contrastes tonales en la piel.', 'Tratamientos faciales', 230.00, 60, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (9, 1, 'FACIAL', 'Tratamiento antiedad y para líneas de expresión', 'Estimulación facial con colágeno cosmético y masaje tensor.', 'Apariencia más tersa y descansada.', 'Tratamientos faciales', 250.00, 75, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600'),
-    (10, 1, 'FACIAL', 'Exfoliación facial o peeling cosmético', 'Renovación superficial suave con micropartículas nutritivas.', 'Favorece una textura sedosa y uniforme.', 'Tratamientos faciales', 210.00, 50, 'FACIAL', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
+    (1, 1, 'FACIAL', 'Limpieza facial básica', 'Higiene facial para retirar impurezas superficiales y tonificar el cutis.', 'Mejora la frescura y suavidad de la piel.', 'Tratamientos faciales', 120.00, 45, 'FACIAL', 'ACTIVO', '/trat_limpieza_facial.png'),
+    (2, 1, 'FACIAL', 'Limpieza facial profunda', 'Exfoliación, vapor de ozono y descongestión para poros limpios y luminosos.', 'Favorece la oxigenación dermo-cutánea.', 'Tratamientos faciales', 180.00, 60, 'FACIAL', 'ACTIVO', '/trat_limpieza_facial.png'),
+    (3, 1, 'FACIAL', 'Limpieza facial con extracción de impurezas', 'Protocolo intensivo con espátula ultrasónica y extracción manual higiénica.', 'Purifica la textura cutánea y reduce brillo.', 'Tratamientos faciales', 200.00, 75, 'FACIAL', 'ACTIVO', '/trat_limpieza_facial.png'),
+    (4, 1, 'FACIAL', 'Hidratación facial intensiva', 'Velo hidratante con ácido hialurónico y activos nutritivos.', 'Aporta elasticidad y sensación de confort.', 'Tratamientos faciales', 160.00, 60, 'FACIAL', 'ACTIVO', '/trat_hidratacion_facial.png'),
+    (5, 1, 'FACIAL', 'Tratamiento facial iluminador', 'Aporte de brillo y revitalización cosmética para pieles fatigadas.', 'Uniforma el aspecto y devuelve vitalidad.', 'Tratamientos faciales', 190.00, 60, 'FACIAL', 'ACTIVO', '/trat_iluminador_facial.png'),
+    (6, 1, 'FACIAL', 'Tratamiento antioxidante con vitamina C', 'Infusión tópica con extractos cítricos que protegen del estrés ambiental.', 'Sensación de luminosidad y frescura.', 'Tratamientos faciales', 210.00, 60, 'FACIAL', 'ACTIVO', '/trat_iluminador_facial.png'),
+    (7, 1, 'FACIAL', 'Tratamiento para piel con acné', 'Protocolo cosmético calmante y seborregulador.', 'Contribuye a descongestionar zonas propensas a brotes.', 'Tratamientos faciales', 220.00, 60, 'FACIAL', 'ACTIVO', '/trat_acne_facial.png'),
+    (8, 1, 'FACIAL', 'Tratamiento para mejorar la apariencia de manchas', 'Aplicación de sueros botánicos aclarantes y mascarilla regeneradora.', 'Atenúa contrastes tonales en la piel.', 'Tratamientos faciales', 230.00, 60, 'FACIAL', 'ACTIVO', '/trat_hidratacion_facial.png'),
+    (9, 1, 'FACIAL', 'Tratamiento antiedad y para líneas de expresión', 'Estimulación facial con colágeno cosmético y masaje tensor.', 'Apariencia más tersa y descansada.', 'Tratamientos faciales', 250.00, 75, 'FACIAL', 'ACTIVO', '/trat_antiedad_facial.png'),
+    (10, 1, 'FACIAL', 'Exfoliación facial o peeling cosmético', 'Renovación superficial suave con micropartículas nutritivas.', 'Favorece una textura sedosa y uniforme.', 'Tratamientos faciales', 210.00, 50, 'FACIAL', 'ACTIVO', '/trat_peeling_facial.png'),
 
     -- 2. Baño de Luna (10)
-    (11, 2, 'LUNA', 'Baño de Luna cuerpo completo', 'Exfoliación, aclarado sutil y nutrición dermo-corporal en todo el cuerpo.', 'Piel suave, radiante y vellos sutilmente dorados.', 'Baño de Luna', 280.00, 90, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (12, 2, 'LUNA', 'Baño de Luna para brazos', 'Protocolo exfoliante y aclarante cosmético específico para brazos.', 'Suavidad y luminosidad homogénea en extremidades.', 'Baño de Luna', 120.00, 40, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600'),
-    (13, 2, 'LUNA', 'Baño de Luna para piernas', 'Cuidado exfoliante e hidratante intensivo para piernas.', 'Textura aterciopelada y brillo natural.', 'Baño de Luna', 140.00, 45, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (14, 2, 'LUNA', 'Baño de Luna para espalda', 'Limpieza exfoliante en zona dorsal con mascarilla nutritiva.', 'Sensación de pureza y lozanía en la espalda.', 'Baño de Luna', 150.00, 45, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (15, 2, 'LUNA', 'Baño de Luna para cuello y escote', 'Tratamiento delicado para la piel sensible del escote.', 'Hidratación y luminosidad reconfortante.', 'Baño de Luna', 110.00, 35, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (16, 2, 'LUNA', 'Baño de Luna para manos y brazos', 'Envoltura de parafina y exfoliación de brazos y manos.', 'Manos tersas y revitalizadas.', 'Baño de Luna', 130.00, 45, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600'),
-    (17, 2, 'LUNA', 'Baño de Luna para piernas y pies', 'Renovación cutánea y masaje relajante en piernas y pies.', 'Alivio y estética sedosa en pies cansados.', 'Baño de Luna', 160.00, 50, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (18, 2, 'LUNA', 'Exfoliación corporal iluminadora', 'Masaje exfoliante con cristales minerales y esencias florales.', 'Remueve células muertas sin irritar.', 'Baño de Luna', 180.00, 60, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (19, 2, 'LUNA', 'Hidratación corporal después de la exfoliación', 'Aplicación de manteca de karité tibia y aceites reconfortantes.', 'Nutrición profunda y barrera protectora.', 'Baño de Luna', 150.00, 45, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (20, 2, 'LUNA', 'Ritual de luminosidad corporal', 'Experiencia completa de baño de luna con masaje aromático.', 'Máximo bienestar y brillo radiante en la piel.', 'Baño de Luna', 320.00, 100, 'LUNA', 'ACTIVO', 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600'),
+    (11, 2, 'LUNA', 'Baño de Luna cuerpo completo', 'Exfoliación, aclarado sutil y nutrición dermo-corporal en todo el cuerpo.', 'Piel suave, radiante y vellos sutilmente dorados.', 'Baño de Luna', 280.00, 90, 'LUNA', 'ACTIVO', '/trat_bano_luna_cuerpo.png'),
+    (12, 2, 'LUNA', 'Baño de Luna para brazos', 'Protocolo exfoliante y aclarante cosmético específico para brazos.', 'Suavidad y luminosidad homogénea en extremidades.', 'Baño de Luna', 120.00, 40, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (13, 2, 'LUNA', 'Baño de Luna para piernas', 'Cuidado exfoliante e hidratante intensivo para piernas.', 'Textura aterciopelada y brillo natural.', 'Baño de Luna', 140.00, 45, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (14, 2, 'LUNA', 'Baño de Luna para espalda', 'Limpieza exfoliante en zona dorsal con mascarilla nutritiva.', 'Sensación de pureza y lozanía en la espalda.', 'Baño de Luna', 150.00, 45, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (15, 2, 'LUNA', 'Baño de Luna para cuello y escote', 'Tratamiento delicado para la piel sensible del escote.', 'Hidratación y luminosidad reconfortante.', 'Baño de Luna', 110.00, 35, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (16, 2, 'LUNA', 'Baño de Luna para manos y brazos', 'Envoltura de parafina y exfoliación de brazos y manos.', 'Manos tersas y revitalizadas.', 'Baño de Luna', 130.00, 45, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (17, 2, 'LUNA', 'Baño de Luna para piernas y pies', 'Renovación cutánea y masaje relajante en piernas y pies.', 'Alivio y estética sedosa en pies cansados.', 'Baño de Luna', 160.00, 50, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (18, 2, 'LUNA', 'Exfoliación corporal iluminadora', 'Masaje exfoliante con cristales minerales y esencias florales.', 'Remueve células muertas sin irritar.', 'Baño de Luna', 180.00, 60, 'LUNA', 'ACTIVO', '/trat_bano_luna_cuerpo.png'),
+    (19, 2, 'LUNA', 'Hidratación corporal después de la exfoliación', 'Aplicación de manteca de karité tibia y aceites reconfortantes.', 'Nutrición profunda y barrera protectora.', 'Baño de Luna', 150.00, 45, 'LUNA', 'ACTIVO', '/trat_bano_luna_zonas.png'),
+    (20, 2, 'LUNA', 'Ritual de luminosidad corporal', 'Experiencia completa de baño de luna con masaje aromático.', 'Máximo bienestar y brillo radiante en la piel.', 'Baño de Luna', 320.00, 100, 'LUNA', 'ACTIVO', '/trat_bano_luna_cuerpo.png'),
 
     -- 3. Cuidado corporal (10)
-    (21, 3, 'CORPORAL', 'Exfoliación corporal completa', 'Pulido dérmico suave en espalda, brazos y piernas.', 'Prepara la piel para absorber nutrientes.', 'Cuidado corporal', 170.00, 50, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (22, 3, 'CORPORAL', 'Hidratación corporal intensiva', 'Envoltura corporal nutritiva con extractos de almendra.', 'Alivia la sequedad y aspereza cutánea.', 'Cuidado corporal', 180.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (23, 3, 'CORPORAL', 'Tratamiento corporal iluminador', 'Serum cosmético enriquecido con perlas botánicas.', 'Sensación satinada y homogénea.', 'Cuidado corporal', 200.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (24, 3, 'CORPORAL', 'Tratamiento cosmético para la apariencia de manchas', 'Cuidado localizado con agentes vegetales unificadores.', 'Mejora visual de zonas hiperpigmentadas.', 'Cuidado corporal', 220.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600'),
-    (25, 3, 'CORPORAL', 'Tratamiento reafirmante corporal', 'Terapia manual con geles criógenos y activos tensores.', 'Favorece la turgencia y firmeza de los tejidos.', 'Cuidado corporal', 230.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (26, 3, 'CORPORAL', 'Tratamiento anticelulítico', 'Masaje vigoroso complementado con activos de cafeína.', 'Ayuda a mejorar el aspecto de piel de naranja.', 'Cuidado corporal', 240.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (27, 3, 'CORPORAL', 'Tratamiento reductor corporal', 'Protocolo reductor con termoterapia en zonas localizadas.', 'Sensación de ligereza y silueta definida.', 'Cuidado corporal', 250.00, 70, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (28, 3, 'CORPORAL', 'Envoltura corporal hidratante', 'Mascarilla corporal con lodo termal y velo de seda.', 'Desintoxicación y tersura profunda.', 'Cuidado corporal', 210.00, 60, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600'),
-    (29, 3, 'CORPORAL', 'Tratamiento para mejorar la apariencia de la piel seca', 'Infusión lipídica reparadora para codos, rodillas y zonas ásperas.', 'Recupera la suavidad perdida.', 'Cuidado corporal', 190.00, 50, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (30, 3, 'CORPORAL', 'Tratamiento localizado para zonas específicas del cuerpo', 'Enfoque personalizado en abdomen, flancos o muslos.', 'Atención concentrada según necesidad del cliente.', 'Cuidado corporal', 160.00, 45, 'CORPORAL', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
+    (21, 3, 'CORPORAL', 'Exfoliación corporal completa', 'Pulido dérmico suave en espalda, brazos y piernas.', 'Prepara la piel para absorber nutrientes.', 'Cuidado corporal', 170.00, 50, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (22, 3, 'CORPORAL', 'Hidratación corporal intensiva', 'Envoltura corporal nutritiva con extractos de almendra.', 'Alivia la sequedad y aspereza cutánea.', 'Cuidado corporal', 180.00, 60, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (23, 3, 'CORPORAL', 'Tratamiento corporal iluminador', 'Serum cosmético enriquecido con perlas botánicas.', 'Sensación satinada y homogénea.', 'Cuidado corporal', 200.00, 60, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (24, 3, 'CORPORAL', 'Tratamiento cosmético para la apariencia de manchas', 'Cuidado localizado con agentes vegetales unificadores.', 'Mejora visual de zonas hiperpigmentadas.', 'Cuidado corporal', 220.00, 60, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (25, 3, 'CORPORAL', 'Tratamiento reafirmante corporal', 'Terapia manual con geles criógenos y activos tensores.', 'Favorece la turgencia y firmeza de los tejidos.', 'Cuidado corporal', 230.00, 60, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (26, 3, 'CORPORAL', 'Tratamiento anticelulítico', 'Masaje vigoroso complementado con activos de cafeína.', 'Ayuda a mejorar el aspecto de piel de naranja.', 'Cuidado corporal', 240.00, 60, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (27, 3, 'CORPORAL', 'Tratamiento reductor corporal', 'Protocolo reductor con termoterapia en zonas localizadas.', 'Sensación de ligereza y silueta definida.', 'Cuidado corporal', 250.00, 70, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (28, 3, 'CORPORAL', 'Envoltura corporal hidratante', 'Mascarilla corporal con lodo termal y velo de seda.', 'Desintoxicación y tersura profunda.', 'Cuidado corporal', 210.00, 60, 'CORPORAL', 'ACTIVO', '/trat_envoltura_corporal.png'),
+    (29, 3, 'CORPORAL', 'Tratamiento para mejorar la apariencia de la piel seca', 'Infusión lipídica reparadora para codos, rodillas y zonas ásperas.', 'Recupera la suavidad perdida.', 'Cuidado corporal', 190.00, 50, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
+    (30, 3, 'CORPORAL', 'Tratamiento localizado para zonas específicas del cuerpo', 'Enfoque personalizado en abdomen, flancos o muslos.', 'Atención concentrada según necesidad del cliente.', 'Cuidado corporal', 160.00, 45, 'CORPORAL', 'ACTIVO', '/trat_cuidado_corporal.png'),
 
     -- 4. Masajes corporales (10)
-    (31, 4, 'MASAJES', 'Masaje relajante', 'Maniobras suaves y fluidas con aceites esenciales neutros.', 'Disminuye la tensión y promueve el descanso.', 'Masajes corporales', 180.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600'),
-    (32, 4, 'MASAJES', 'Masaje descontracturante', 'Presión moderada a profunda en zonas con sobrecarga muscular.', 'Alivia contracturas y rigidez en espalda y cuello.', 'Masajes corporales', 200.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (33, 4, 'MASAJES', 'Masaje de espalda y cuello', 'Focalizado en cervicales y trapecios para descanso rápido.', 'Especial para jornadas sedentarias o de oficina.', 'Masajes corporales', 130.00, 40, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600'),
-    (34, 4, 'MASAJES', 'Masaje de piernas y pies', 'Técnica descongestiva para estimular la circulación.', 'Sensación de alivio y ligereza en las piernas.', 'Masajes corporales', 140.00, 40, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (35, 4, 'MASAJES', 'Masaje corporal completo', 'Sesión integral desde pies a cabeza para relajación total.', 'Armonía corporal y bienestar emocional.', 'Masajes corporales', 220.00, 75, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
-    (36, 4, 'MASAJES', 'Masaje reductor', 'Movimientos activos y termogénicos en abdomen y cadera.', 'Estimula la microcirculación cutánea.', 'Masajes corporales', 210.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (37, 4, 'MASAJES', 'Masaje anticelulítico', 'Fricciones especializadas para descompactar tejidos.', 'Mejora la textura y tono de la piel.', 'Masajes corporales', 210.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600'),
-    (38, 4, 'MASAJES', 'Masaje con piedras calientes', 'Terapia geotermal con piedras volcánicas templadas.', 'Calor reconfortante que relaja los músculos en profundidad.', 'Masajes corporales', 240.00, 75, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600'),
-    (39, 4, 'MASAJES', 'Maderoterapia corporal', 'Masaje con rodillos y copas anatómicas de madera noble.', 'Tonificación de tejidos y modelado corporal.', 'Masajes corporales', 230.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600'),
-    (40, 4, 'MASAJES', 'Masaje con aromaterapia', 'Masaje sensorial con selección de esencias de lavanda y jazmín.', 'Calma mental, descanso y aromaterapia pura.', 'Masajes corporales', 190.00, 60, 'MASAJES', 'ACTIVO', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600'),
+    (31, 4, 'MASAJES', 'Masaje relajante', 'Maniobras suaves y fluidas con aceites esenciales neutros.', 'Disminuye la tensión y promueve el descanso.', 'Masajes corporales', 180.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_relajante.png'),
+    (32, 4, 'MASAJES', 'Masaje descontracturante', 'Presión moderada a profunda en zonas con sobrecarga muscular.', 'Alivia contracturas y rigidez en espalda y cuello.', 'Masajes corporales', 200.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_descontracturante.png'),
+    (33, 4, 'MASAJES', 'Masaje de espalda y cuello', 'Focalizado en cervicales y trapecios para descanso rápido.', 'Especial para jornadas sedentarias o de oficina.', 'Masajes corporales', 130.00, 40, 'MASAJES', 'ACTIVO', '/trat_masaje_relajante.png'),
+    (34, 4, 'MASAJES', 'Masaje de piernas y pies', 'Técnica descongestiva para estimular la circulación.', 'Sensación de alivio y ligereza en las piernas.', 'Masajes corporales', 140.00, 40, 'MASAJES', 'ACTIVO', '/trat_masaje_relajante.png'),
+    (35, 4, 'MASAJES', 'Masaje corporal completo', 'Sesión integral desde pies a cabeza para relajación total.', 'Armonía corporal y bienestar emocional.', 'Masajes corporales', 220.00, 75, 'MASAJES', 'ACTIVO', '/trat_masaje_relajante.png'),
+    (36, 4, 'MASAJES', 'Masaje reductor', 'Movimientos activos y termogénicos en abdomen y cadera.', 'Estimula la microcirculación cutánea.', 'Masajes corporales', 210.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_descontracturante.png'),
+    (37, 4, 'MASAJES', 'Masaje anticelulítico', 'Fricciones especializadas para descompactar tejidos.', 'Mejora la textura y tono de la piel.', 'Masajes corporales', 210.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_descontracturante.png'),
+    (38, 4, 'MASAJES', 'Masaje con piedras calientes', 'Terapia geotermal con piedras volcánicas templadas.', 'Calor reconfortante que relaja los músculos en profundidad.', 'Masajes corporales', 240.00, 75, 'MASAJES', 'ACTIVO', '/trat_masaje_piedras.png'),
+    (39, 4, 'MASAJES', 'Maderoterapia corporal', 'Masaje con rodillos y copas anatómicas de madera noble.', 'Tonificación de tejidos y modelado corporal.', 'Masajes corporales', 230.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_descontracturante.png'),
+    (40, 4, 'MASAJES', 'Masaje con aromaterapia', 'Masaje sensorial con selección de esencias de lavanda y jazmín.', 'Calma mental, descanso y aromaterapia pura.', 'Masajes corporales', 190.00, 60, 'MASAJES', 'ACTIVO', '/trat_masaje_relajante.png'),
 
     -- 5. Depilación facial y corporal (5) [DEMO]
-    (41, 5, 'DEPILACION', 'Depilación facial (bozo y mentón) [DEMO]', 'Extracción con cera tibia hipoalergénica.', 'Elimina vellitos delicadamente.', 'Depilación facial y corporal', 50.00, 20, 'DEPILACION', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (42, 5, 'DEPILACION', 'Depilación facial completa [DEMO]', 'Tratamiento en frente, mejillas, bozo y mentón.', 'Rostro suave y uniforme.', 'Depilación facial y corporal', 90.00, 35, 'DEPILACION', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (43, 5, 'DEPILACION', 'Depilación de axilas [DEMO]', 'Cera con aloe vera para pieles delicadas.', 'Axilas limpias y suaves.', 'Depilación facial y corporal', 60.00, 25, 'DEPILACION', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (44, 5, 'DEPILACION', 'Depilación de piernas completas [DEMO]', 'Retiro de vello desde muslos hasta tobillos.', 'Piernas sedosas por varias semanas.', 'Depilación facial y corporal', 140.00, 50, 'DEPILACION', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
-    (45, 5, 'DEPILACION', 'Depilación corporal completa [DEMO]', 'Sesión integral que incluye piernas, axilas y brazos.', 'Piel suave sin vello en todo el cuerpo.', 'Depilación facial y corporal', 260.00, 90, 'DEPILACION', 'ACTIVO', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'),
+    (41, 5, 'DEPILACION', 'Depilación facial (bozo y mentón) [DEMO]', 'Extracción con cera tibia hipoalergénica.', 'Elimina vellitos delicadamente.', 'Depilación facial y corporal', 50.00, 20, 'DEPILACION', 'ACTIVO', '/trat_depilacion.png'),
+    (42, 5, 'DEPILACION', 'Depilación facial completa [DEMO]', 'Tratamiento en frente, mejillas, bozo y mentón.', 'Rostro suave y uniforme.', 'Depilación facial y corporal', 90.00, 35, 'DEPILACION', 'ACTIVO', '/trat_depilacion.png'),
+    (43, 5, 'DEPILACION', 'Depilación de axilas [DEMO]', 'Cera con aloe vera para pieles delicadas.', 'Axilas limpias y suaves.', 'Depilación facial y corporal', 60.00, 25, 'DEPILACION', 'ACTIVO', '/trat_depilacion.png'),
+    (44, 5, 'DEPILACION', 'Depilación de piernas completas [DEMO]', 'Retiro de vello desde muslos hasta tobillos.', 'Piernas sedosas por varias semanas.', 'Depilación facial y corporal', 140.00, 50, 'DEPILACION', 'ACTIVO', '/trat_depilacion.png'),
+    (45, 5, 'DEPILACION', 'Depilación corporal completa [DEMO]', 'Sesión integral que incluye piernas, axilas y brazos.', 'Piel suave sin vello en todo el cuerpo.', 'Depilación facial y corporal', 260.00, 90, 'DEPILACION', 'ACTIVO', '/trat_depilacion.png'),
 
     -- 6. Lifting de pestañas (3) [DEMO]
-    (46, 6, 'PESTANAS', 'Lifting de pestañas natural [DEMO]', 'Curvatura elegante desde la raíz con almohadillas de silicona.', 'Abre la mirada de forma natural.', 'Lifting de pestañas', 120.00, 45, 'PESTANAS', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
-    (47, 6, 'PESTANAS', 'Lifting de pestañas con tinte y keratina [DEMO]', 'Curvatura, color negro intenso y baño nutritivo de keratina.', 'Efecto rímel duradero sin maquillaje.', 'Lifting de pestañas', 150.00, 60, 'PESTANAS', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
-    (48, 6, 'PESTANAS', 'Retoque y nutrición de pestañas [DEMO]', 'Cuidado de mantenimiento y suero fortificante.', 'Pestañas fuertes y nutridas.', 'Lifting de pestañas', 90.00, 35, 'PESTANAS', 'ACTIVO', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600'),
+    (46, 6, 'PESTANAS', 'Lifting de pestañas natural [DEMO]', 'Curvatura elegante desde la raíz con almohadillas de silicona.', 'Abre la mirada de forma natural.', 'Lifting de pestañas', 120.00, 45, 'PESTANAS', 'ACTIVO', '/cat_pestanas.png'),
+    (47, 6, 'PESTANAS', 'Lifting de pestañas con tinte y keratina [DEMO]', 'Curvatura, color negro intenso y baño nutritivo de keratina.', 'Efecto rímel duradero sin maquillaje.', 'Lifting de pestañas', 150.00, 60, 'PESTANAS', 'ACTIVO', '/cat_pestanas.png'),
+    (48, 6, 'PESTANAS', 'Retoque y nutrición de pestañas [DEMO]', 'Cuidado de mantenimiento y suero fortificante.', 'Pestañas fuertes y nutridas.', 'Lifting de pestañas', 90.00, 35, 'PESTANAS', 'ACTIVO', '/cat_pestanas.png'),
 
     -- 7. Perfilado de cejas (3) [DEMO]
-    (49, 7, 'CEJAS', 'Perfilado y diseño de cejas [DEMO]', 'Diseño personalizado según morfología facial con pinza.', 'Cejas definidas y armónicas.', 'Perfilado de cejas', 50.00, 30, 'CEJAS', 'ACTIVO', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600'),
-    (50, 7, 'CEJAS', 'Perfilado de cejas con tinte henna [DEMO]', 'Definición y sombreado semipermanente con tinte orgánico.', 'Aspecto de cejas más tupidas y pulidas.', 'Perfilado de cejas', 80.00, 40, 'CEJAS', 'ACTIVO', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600'),
-    (51, 7, 'CEJAS', 'Diseño y depilación armónica de cejas [DEMO]', 'Mapeo facial con hilo y remoción precisa de excedentes.', 'Líneas limpias que resaltan la expresión.', 'Perfilado de cejas', 65.00, 35, 'CEJAS', 'ACTIVO', 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600');
+    (49, 7, 'CEJAS', 'Perfilado y diseño de cejas [DEMO]', 'Diseño personalizado según morfología facial con pinza.', 'Cejas definidas y armónicas.', 'Perfilado de cejas', 50.00, 30, 'CEJAS', 'ACTIVO', '/cat_cejas.png'),
+    (50, 7, 'CEJAS', 'Perfilado de cejas con tinte henna [DEMO]', 'Definición y sombreado semipermanente con tinte orgánico.', 'Aspecto de cejas más tupidas y pulidas.', 'Perfilado de cejas', 80.00, 40, 'CEJAS', 'ACTIVO', '/cat_cejas.png'),
+    (51, 7, 'CEJAS', 'Diseño y depilación armónica de cejas [DEMO]', 'Mapeo facial con hilo y remoción precisa de excedentes.', 'Líneas limpias que resaltan la expresión.', 'Perfilado de cejas', 65.00, 35, 'CEJAS', 'ACTIVO', '/cat_cejas.png');
 
     -- Asociar todos los servicios a las 4 sucursales
     INSERT OR IGNORE INTO branch_services (branch_id, service_id, active)
@@ -509,12 +509,11 @@ async function initSqliteFallback() {
     FROM branches b
     CROSS JOIN services s;
 
-    -- 5. PROMOCIONES ESPECIALES (Módulo 12)
     -- 5. PROMOCIONES GLOBALES (Módulo 12)
     INSERT OR IGNORE INTO promotions (id, title, description, service_id, regular_price, promo_price, discount_percent, start_date, end_date, badge, image, active) VALUES
-    (1, 'Renovación Total: Baño de Luna + Facial', 'Combina nuestro Baño de Luna cuerpo completo con una limpieza facial iluminadora a precio especial.', 11, 460.00, 320.00, 30, '2026-01-01', '2026-12-31', 'OFERTA DESTACADA', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600', 1),
-    (2, 'Dúo Relajante & Piedras Calientes', 'Sesión de masaje geotermal y aromaterapia profunda para renovar cuerpo y mente.', 38, 430.00, 280.00, 35, '2026-01-01', '2026-12-31', 'MÁS POPULAR', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600', 1),
-    (3, 'Pack Mirada Radiante (Lifting + Perfilado)', 'Lifting de pestañas con keratina y diseño armónico de cejas en una sola cita.', 47, 230.00, 160.00, 30, '2026-01-01', '2026-12-31', 'BELLEZA INTEGRAL', 'https://images.unsplash.com/photo-1512290900672-1f41b4e2f9d6?w=600', 1);
+    (1, 'Renovación Total: Baño de Luna + Facial', 'Combina nuestro Baño de Luna cuerpo completo con una limpieza facial iluminadora a precio especial.', 11, 460.00, 320.00, 30, '2026-01-01', '2026-12-31', 'OFERTA DESTACADA', '/promo_bano_luna_facial.png', 1),
+    (2, 'Dúo Relajante & Piedras Calientes', 'Sesión de masaje geotermal y aromaterapia profunda para renovar cuerpo y mente.', 38, 430.00, 280.00, 35, '2026-01-01', '2026-12-31', 'MÁS POPULAR', '/promo_masaje_piedras.png', 1),
+    (3, 'Pack Mirada Radiante (Lifting + Perfilado)', 'Lifting de pestañas con keratina y diseño armónico de cejas en una sola cita.', 47, 230.00, 160.00, 30, '2026-01-01', '2026-12-31', 'BELLEZA INTEGRAL', '/promo_mirada_radiante.png', 1);
 
     -- 6. VERSÍCULOS BÍBLICOS INSPIRADORES (Módulo 08)
     INSERT OR IGNORE INTO verses (id, reference, version, text, reflection, sort_order, active) VALUES
@@ -525,14 +524,14 @@ async function initSqliteFallback() {
 
     -- 7. PRODUCTOS COSMÉTICOS Y EXISTENCIAS POR SUCURSAL
     INSERT OR IGNORE INTO beauty_products (id, name, brand, category, type, description, usage_instructions, status, price, image) VALUES
-    (1, 'Serum Facial Ácido Hialurónico Puro', 'Talita Kumi Dermo', 'Hidratación', 'FACIAL', 'Concentrado al 2% para retener hidratación dérmica.', 'Aplicar 4 gotas sobre el rostro limpio por la mañana y noche.', 'ACTIVO', 140.00, 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'),
-    (2, 'Gel Exfoliante Renovador de Bambú', 'Talita Kumi Botanical', 'Exfoliación', 'FACIAL', 'Microgránulos vegetales que pulen la piel con suavidad.', 'Usar 1 a 2 veces por semana con movimientos circulares.', 'ACTIVO', 95.00, 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'),
-    (3, 'Loción Tónica Descongestiva de Rosas', 'Talita Kumi Herbal', 'Tonificación', 'FACIAL', 'Agua de rosas destilada para balancear el pH dérmico.', 'Rociar a 20 cm del rostro tras la limpieza.', 'ACTIVO', 80.00, 'https://images.unsplash.com/photo-1608248597359-5f284b39b56f?w=400'),
-    (4, 'Crema Corporal Nutritiva Manteca de Karité', 'Talita Kumi Body Care', 'Corporal', 'CORPORAL', 'Emulsión densa para zonas secas y codos.', 'Aplicar generosamente tras el baño.', 'ACTIVO', 110.00, 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400'),
-    (5, 'Aceite de Almendras Dulces & Vitamina E', 'Talita Kumi Body Care', 'Corporal', 'CORPORAL', 'Aceite ligero para masaje y prevención de sequedad.', 'Masajear suavemente sobre la piel ligeramente húmeda.', 'ACTIVO', 85.00, 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400'),
-    (6, 'Mascarilla Facial de Arcilla Volcánica', 'Talita Kumi Dermo', 'Purificante', 'FACIAL', 'Arcilla purificante que absorbe el exceso de sebo.', 'Dejar actuar 10 minutos y retirar con agua templada.', 'ACTIVO', 105.00, 'https://images.unsplash.com/photo-1567928815104-b7980ee5032e?w=400'),
-    (7, 'Protector Solar Facial FPS 50+ Invisible', 'Talita Kumi Sun Care', 'Protección', 'FACIAL', 'Filtro solar mineral sin residuo blanco ni brillo graso.', 'Aplicar cada mañana 20 minutos antes de salir.', 'ACTIVO', 160.00, 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400'),
-    (8, 'Sales de Baño Exfoliantes con Lavanda', 'Talita Kumi Spa', 'Spa Corporal', 'CORPORAL', 'Sales marinas aromatizadas para pediluvio o baño.', 'Disolver 2 cucharadas en agua templada.', 'ACTIVO', 75.00, 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400');
+    (1, 'Serum Facial Ácido Hialurónico Puro', 'Talita Kumi Dermo', 'Hidratación', 'FACIAL', 'Concentrado al 2% para retener hidratación dérmica.', 'Aplicar 4 gotas sobre el rostro limpio por la mañana y noche.', 'ACTIVO', 140.00, '/prod_serum_facial.png'),
+    (2, 'Gel Exfoliante Renovador de Bambú', 'Talita Kumi Botanical', 'Exfoliación', 'FACIAL', 'Microgránulos vegetales que pulen la piel con suavidad.', 'Usar 1 a 2 veces por semana con movimientos circulares.', 'ACTIVO', 95.00, '/prod_gel_exfoliante.png'),
+    (3, 'Loción Tónica Descongestiva de Rosas', 'Talita Kumi Herbal', 'Tonificación', 'FACIAL', 'Agua de rosas destilada para balancear el pH dérmico.', 'Rociar a 20 cm del rostro tras la limpieza.', 'ACTIVO', 80.00, '/prod_tonico_rosas.png'),
+    (4, 'Crema Corporal Nutritiva Manteca de Karité', 'Talita Kumi Body Care', 'Corporal', 'CORPORAL', 'Emulsión densa para zonas secas y codos.', 'Aplicar generosamente tras el baño.', 'ACTIVO', 110.00, '/prod_crema_corporal.png'),
+    (5, 'Aceite de Almendras Dulces & Vitamina E', 'Talita Kumi Body Care', 'Corporal', 'CORPORAL', 'Aceite ligero para masaje y prevención de sequedad.', 'Masajear suavemente sobre la piel ligeramente húmeda.', 'ACTIVO', 85.00, '/prod_aceite_almendras.png'),
+    (6, 'Mascarilla Facial de Arcilla Volcánica', 'Talita Kumi Dermo', 'Purificante', 'FACIAL', 'Arcilla purificante que absorbe el exceso de sebo.', 'Dejar actuar 10 minutos y retirar con agua templada.', 'ACTIVO', 105.00, '/prod_mascarilla_arcilla.png'),
+    (7, 'Protector Solar Facial FPS 50+ Invisible', 'Talita Kumi Sun Care', 'Protección', 'FACIAL', 'Filtro solar mineral sin residuo blanco ni brillo graso.', 'Aplicar cada mañana 20 minutos antes de salir.', 'ACTIVO', 160.00, '/prod_protector_solar.png'),
+    (8, 'Sales de Baño Exfoliantes con Lavanda', 'Talita Kumi Spa', 'Spa Corporal', 'CORPORAL', 'Sales marinas aromatizadas para pediluvio o baño.', 'Disolver 2 cucharadas en agua templada.', 'ACTIVO', 75.00, '/prod_sales_lavanda.png');
 
     -- Inventario por sucursal (stock diferenciado para las 4 sedes)
     INSERT OR IGNORE INTO branch_inventory (branch_id, product_id, stock, min_stock) VALUES
@@ -555,10 +554,69 @@ async function initSqliteFallback() {
   `;
   db.run(seedSql);
 
+  // Migración garantizada de imágenes locales para evitar cualquier dependencia externa
+  const updateLocalImagesSql = `
+    UPDATE service_categories SET image = CASE code
+      WHEN 'FACIAL' THEN '/cat_facial.png'
+      WHEN 'LUNA' THEN '/cat_luna.png'
+      WHEN 'CORPORAL' THEN '/cat_corporal.png'
+      WHEN 'MASAJES' THEN '/cat_masajes.png'
+      WHEN 'DEPILACION' THEN '/cat_depilacion.png'
+      WHEN 'PESTANAS' THEN '/cat_pestanas.png'
+      WHEN 'CEJAS' THEN '/cat_cejas.png'
+      ELSE '/cat_facial.png'
+    END WHERE image LIKE '%unsplash%' OR image IS NULL OR image = '';
+
+    UPDATE services SET image = CASE 
+      WHEN id IN (1, 2, 3) THEN '/trat_limpieza_facial.png'
+      WHEN id = 4 THEN '/trat_hidratacion_facial.png'
+      WHEN id IN (5, 6) THEN '/trat_iluminador_facial.png'
+      WHEN id = 7 THEN '/trat_acne_facial.png'
+      WHEN id = 8 THEN '/trat_hidratacion_facial.png'
+      WHEN id = 9 THEN '/trat_antiedad_facial.png'
+      WHEN id = 10 THEN '/trat_peeling_facial.png'
+      WHEN id IN (11, 18, 20) THEN '/trat_bano_luna_cuerpo.png'
+      WHEN id IN (12, 13, 14, 15, 16, 17, 19) THEN '/trat_bano_luna_zonas.png'
+      WHEN id = 28 THEN '/trat_envoltura_corporal.png'
+      WHEN id BETWEEN 21 AND 30 THEN '/trat_cuidado_corporal.png'
+      WHEN id IN (31, 33, 34, 35, 40) THEN '/trat_masaje_relajante.png'
+      WHEN id IN (32, 36, 37, 39) THEN '/trat_masaje_descontracturante.png'
+      WHEN id = 38 THEN '/trat_masaje_piedras.png'
+      WHEN id BETWEEN 41 AND 45 THEN '/trat_depilacion.png'
+      WHEN id BETWEEN 46 AND 48 THEN '/cat_pestanas.png'
+      WHEN id BETWEEN 49 AND 51 THEN '/cat_cejas.png'
+      ELSE '/trat_limpieza_facial.png'
+    END WHERE image LIKE '%unsplash%' OR image IS NULL OR image = '';
+
+    UPDATE promotions SET image = CASE id
+      WHEN 1 THEN '/promo_bano_luna_facial.png'
+      WHEN 2 THEN '/promo_masaje_piedras.png'
+      WHEN 3 THEN '/promo_mirada_radiante.png'
+      ELSE '/promo_bano_luna_facial.png'
+    END WHERE image LIKE '%unsplash%' OR image IS NULL OR image = '';
+
+    UPDATE beauty_products SET image = CASE id
+      WHEN 1 THEN '/prod_serum_facial.png'
+      WHEN 2 THEN '/prod_gel_exfoliante.png'
+      WHEN 3 THEN '/prod_tonico_rosas.png'
+      WHEN 4 THEN '/prod_crema_corporal.png'
+      WHEN 5 THEN '/prod_aceite_almendras.png'
+      WHEN 6 THEN '/prod_mascarilla_arcilla.png'
+      WHEN 7 THEN '/prod_protector_solar.png'
+      WHEN 8 THEN '/prod_sales_lavanda.png'
+      ELSE '/prod_serum_facial.png'
+    END WHERE image LIKE '%unsplash%' OR image IS NULL OR image = '';
+  `;
+  try {
+    db.run(updateLocalImagesSql);
+  } catch (err) {
+    console.warn('[DB] Nota al actualizar rutas de imágenes:', err.message);
+  }
+
   sqliteDb = db;
   currentEngine = 'SQLITE_LOCAL';
   saveSqliteToDisk();
-  console.log('[DB] Motor SQLite local inicializado exitosamente con las 4 sucursales y 51 tratamientos.');
+  console.log('[DB] Motor SQLite local inicializado exitosamente con imágenes 100% locales.');
 }
 
 async function initDatabase() {

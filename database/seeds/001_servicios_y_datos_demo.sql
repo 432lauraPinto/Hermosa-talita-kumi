@@ -94,13 +94,13 @@ INSERT INTO marcas (id, nombre, descripcion, activo) VALUES
 (2, 'Bio-Luz Spa (DEMO)', 'Línea de relajación y bienestar para cuidado dérmico', 1)
 ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
 
-INSERT INTO productos (id, categoria_id, marca_id, codigo, nombre, descripcion, tipo, funcion, instrucciones_uso, precio_publicado, es_demo, activo) VALUES
-(1, 1, 1, 'PROD_LIMPIADOR_SUAVE', 'Limpiador Facial Suave', 'Espuma micelar limpiadora para retirar impurezas respetando el pH de la piel.', 'facial', 'Limpieza diaria matutina y nocturna del rostro.', 'Aplicar con movimientos circulares sobre rostro húmedo y retirar con agua templada.', 85.00, 1, 1),
-(2, 1, 1, 'PROD_CREMA_HIDRAT_FAC', 'Crema Hidratante Facial Día', 'Emulsión ligera con ácido hialurónico botánico para retener la humedad natural.', 'facial', 'Hidratación y tersura continua.', 'Aplicar sobre la piel limpia cada mañana antes del protector solar.', 110.00, 1, 1),
-(3, 1, 1, 'PROD_PROTECTOR_SOLAR', 'Protector Solar Dermo-Silk FPS 50+', 'Bloqueador solar facial toque seco sin residuo graso, ideal para la altura de La Paz.', 'facial', 'Protección solar diaria ante rayos UVA/UVB.', 'Aplicar generosamente 20 minutos antes de la exposición y reaplicar cada 3 horas.', 130.00, 1, 1),
-(4, 2, 2, 'PROD_CREMA_CORP_NUTRI', 'Crema Nutritiva Corporal Silk Touch', 'Manteca corporal con extracto de karité para suavizar zonas resecas del cuerpo.', 'corporal', 'Nutrición dérmica corporal post-ducha.', 'Masajear suavemente por todo el cuerpo, especialmente en codos y rodillas.', 95.00, 1, 1),
-(5, 2, 2, 'PROD_EXFOLIANTE_CORP', 'Exfoliante Corporal Cristales Dorados', 'Exfoliante suave con gránulos botánicos para el mantenimiento post Baño de Luna.', 'corporal', 'Renovación y tersura corporal.', 'Usar una o dos veces por semana bajo la ducha frotando con suavidad.', 105.00, 1, 1)
-ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), precio_publicado=VALUES(precio_publicado);
+INSERT INTO productos (id, categoria_id, marca_id, codigo, nombre, descripcion, tipo, funcion, instrucciones_uso, precio_publicado, imagen_url, es_demo, activo) VALUES
+(1, 1, 1, 'PROD_LIMPIADOR_SUAVE', 'Limpiador Facial Suave', 'Espuma micelar limpiadora para retirar impurezas respetando el pH de la piel.', 'facial', 'Limpieza diaria matutina y nocturna del rostro.', 'Aplicar con movimientos circulares sobre rostro húmedo y retirar con agua templada.', 85.00, '/prod_serum_facial.png', 1, 1),
+(2, 1, 1, 'PROD_CREMA_HIDRAT_FAC', 'Crema Hidratante Facial Día', 'Emulsión ligera con ácido hialurónico botánico para retener la humedad natural.', 'facial', 'Hidratación y tersura continua.', 'Aplicar sobre la piel limpia cada mañana antes del protector solar.', 110.00, '/prod_gel_exfoliante.png', 1, 1),
+(3, 1, 1, 'PROD_PROTECTOR_SOLAR', 'Protector Solar Dermo-Silk FPS 50+', 'Bloqueador solar facial toque seco sin residuo graso, ideal para la altura de La Paz.', 'facial', 'Protección solar diaria ante rayos UVA/UVB.', 'Aplicar generosamente 20 minutos antes de la exposición y reaplicar cada 3 horas.', 130.00, '/prod_protector_solar.png', 1, 1),
+(4, 2, 2, 'PROD_CREMA_CORP_NUTRI', 'Crema Nutritiva Corporal Silk Touch', 'Manteca corporal con extracto de karité para suavizar zonas resecas del cuerpo.', 'corporal', 'Nutrición dérmica corporal post-ducha.', 'Masajear suavemente por todo el cuerpo, especialmente en codos y rodillas.', 95.00, '/prod_crema_corporal.png', 1, 1),
+(5, 2, 2, 'PROD_EXFOLIANTE_CORP', 'Exfoliante Corporal Cristales Dorados', 'Exfoliante suave con gránulos botánicos para el mantenimiento post Baño de Luna.', 'corporal', 'Renovación y tersura corporal.', 'Usar una o dos veces por semana bajo la ducha frotando con suavidad.', 105.00, '/prod_sales_lavanda.png', 1, 1)
+ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), precio_publicado=VALUES(precio_publicado), imagen_url=VALUES(imagen_url);
 
 -- Existencias iniciales para venta (8 unidades vendibles por producto por sucursal)
 INSERT INTO existencias_sucursal (sucursal_id, producto_id, stock_venta, stock_minimo)
@@ -110,13 +110,35 @@ CROSS JOIN productos p
 ON DUPLICATE KEY UPDATE stock_venta=VALUES(stock_venta);
 
 -- 2 Promociones Globales Oficiales (Módulo 12 y 19) — SIN SUCURSAL ASIGNADA
-INSERT INTO promociones (id, nombre, descripcion, tipo_descuento, valor_descuento, fecha_inicio, fecha_fin, tipo_vigencia, condiciones, cupos_maximos, estado, es_demo) VALUES
-(1, 'Descuento en Limpieza Facial', 'Aprovecha un 10% de descuento directo en tu sesión de Limpieza Facial Profunda.', 'porcentaje', 10.00, CURRENT_DATE(), DATE_ADD(CURRENT_DATE(), INTERVAL 45 DAY), 'fecha_reserva', 'Válido para una reserva por cliente. Aplica en cualquiera de nuestras cuatro sucursales.', 50, 'activa', 1),
-(2, 'Bienestar Integral Spa', 'Bs 20 de descuento especial al agendar tu Masaje Relajante.', 'monto_fijo', 20.00, CURRENT_DATE(), DATE_ADD(CURRENT_DATE(), INTERVAL 60 DAY), 'fecha_reserva', 'Válido para todo el centro estético. No acumulable con otras promociones.', 40, 'activa', 1)
-ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), valor_descuento=VALUES(valor_descuento);
+INSERT INTO promociones (id, nombre, descripcion, tipo_descuento, valor_descuento, fecha_inicio, fecha_fin, tipo_vigencia, condiciones, cupos_maximos, imagen_url, estado, es_demo) VALUES
+(1, 'Descuento en Limpieza Facial', 'Aprovecha un 10% de descuento directo en tu sesión de Limpieza Facial Profunda.', 'porcentaje', 10.00, CURRENT_DATE(), DATE_ADD(CURRENT_DATE(), INTERVAL 45 DAY), 'fecha_reserva', 'Válido para una reserva por cliente. Aplica en cualquiera de nuestras cuatro sucursales.', 50, '/promo_bano_luna_facial.png', 'activa', 1),
+(2, 'Bienestar Integral Spa', 'Bs 20 de descuento especial al agendar tu Masaje Relajante.', 'monto_fijo', 20.00, CURRENT_DATE(), DATE_ADD(CURRENT_DATE(), INTERVAL 60 DAY), 'fecha_reserva', 'Válido para todo el centro estético. No acumulable con otras promociones.', 40, '/promo_masaje_piedras.png', 'activa', 1)
+ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), valor_descuento=VALUES(valor_descuento), imagen_url=VALUES(imagen_url);
 
 -- Vinculación de promociones a servicios correspondientes
 INSERT INTO promociones_servicios (promocion_id, servicio_id) VALUES
 (1, 2), -- Limpieza facial profunda
 (2, 31) -- Masaje relajante
 ON DUPLICATE KEY UPDATE servicio_id=VALUES(servicio_id);
+
+-- Actualización de imagen_url local para todos los tratamientos (Módulo 09 y 17)
+UPDATE servicios SET imagen_url = CASE 
+  WHEN id IN (1, 2, 3) THEN '/trat_limpieza_facial.png'
+  WHEN id = 4 THEN '/trat_hidratacion_facial.png'
+  WHEN id IN (5, 6) THEN '/trat_iluminador_facial.png'
+  WHEN id = 7 THEN '/trat_acne_facial.png'
+  WHEN id = 8 THEN '/trat_hidratacion_facial.png'
+  WHEN id = 9 THEN '/trat_antiedad_facial.png'
+  WHEN id = 10 THEN '/trat_peeling_facial.png'
+  WHEN id IN (11, 18, 20) THEN '/trat_bano_luna_cuerpo.png'
+  WHEN id IN (12, 13, 14, 15, 16, 17, 19) THEN '/trat_bano_luna_zonas.png'
+  WHEN id = 28 THEN '/trat_envoltura_corporal.png'
+  WHEN id BETWEEN 21 AND 30 THEN '/trat_cuidado_corporal.png'
+  WHEN id IN (31, 33, 34, 35, 40) THEN '/trat_masaje_relajante.png'
+  WHEN id IN (32, 36, 37, 39) THEN '/trat_masaje_descontracturante.png'
+  WHEN id = 38 THEN '/trat_masaje_piedras.png'
+  WHEN id BETWEEN 41 AND 48 THEN '/trat_depilacion.png'
+  WHEN id BETWEEN 49 AND 51 THEN '/cat_pestanas.png'
+  WHEN id BETWEEN 52 AND 54 THEN '/cat_cejas.png'
+  ELSE '/trat_limpieza_facial.png'
+END WHERE imagen_url IS NULL OR imagen_url = '';

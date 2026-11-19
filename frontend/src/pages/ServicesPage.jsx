@@ -200,9 +200,10 @@ export default function ServicesPage({ onNavigate, onSelectServiceForBooking, in
                 >
                   <div style={{ height: '190px', position: 'relative', overflow: 'hidden' }}>
                     <img
-                      src={cat.image || '/banner-rosa.jpg'}
+                      src={cat.image || '/cat_facial.png'}
                       alt={cat.name}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.target.src = '/cat_facial.png'; }}
                     />
                     <div style={{
                       position: 'absolute',
@@ -386,9 +387,10 @@ export default function ServicesPage({ onNavigate, onSelectServiceForBooking, in
                   >
                     <div style={{ height: '210px', overflow: 'hidden', position: 'relative' }}>
                       <img
-                        src={service.image || '/banner-rosa.jpg'}
+                        src={service.image || '/trat_limpieza_facial.png'}
                         alt={service.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.target.src = '/trat_limpieza_facial.png'; }}
                       />
                       <div style={{
                         position: 'absolute',

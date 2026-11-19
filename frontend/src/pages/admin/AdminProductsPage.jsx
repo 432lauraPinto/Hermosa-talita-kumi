@@ -26,7 +26,7 @@ export default function AdminProductsPage({ onNavigate }) {
     frequency: 'Mañana y noche',
     status: 'ACTIVO',
     price: 120.00,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'
+    image: '/prod_serum_facial.png'
   });
 
   const [assignForm, setAssignForm] = useState({
@@ -81,7 +81,7 @@ export default function AdminProductsPage({ onNavigate }) {
       frequency: 'Mañana y noche',
       status: 'ACTIVO',
       price: 120.00,
-      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'
+      image: '/prod_serum_facial.png'
     });
     setProductModalOpen(true);
   };
