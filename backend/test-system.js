@@ -70,19 +70,21 @@ async function runTestSuite() {
     const health = await makeRequest('GET', '/health');
     assert('1. Endpoint de Salud /api/health', health.status === 200 && health.body.status === 'ONLINE');
 
-    // 2. Sucursales (3 sedes: Sopocachi, Calacoto, Cochabamba)
+    // 2. Sucursales (4 sedes oficiales: Villa Fátima, UPEA – El Alto, Ceja – El Alto, Max Paredes)
     const branches = await makeRequest('GET', '/branches');
-    assert('2. Consulta de Sucursales /api/branches (3 sedes)', 
+    assert('2. Consulta de Sucursales /api/branches (4 sedes oficiales)', 
       branches.status === 200 && 
-      branches.body.branches.length >= 3 &&
-      branches.body.branches.some(b => b.city.includes('La Paz')) &&
-      branches.body.branches.some(b => b.city.includes('Cochabamba'))
+      branches.body.branches.length === 4 &&
+      branches.body.branches.some(b => b.name === 'Villa Fátima') &&
+      branches.body.branches.some(b => b.name === 'UPEA – El Alto') &&
+      branches.body.branches.some(b => b.name === 'Ceja – El Alto') &&
+      branches.body.branches.some(b => b.name === 'Max Paredes')
     );
     console.log(`       -> Sedes registradas: ${branches.body.branches.map(b => b.name).join(' | ')}`);
 
     // 3. Servicios
     const services = await makeRequest('GET', '/services');
-    assert('3. Catálogo de Servicios /api/services', services.status === 200 && services.body.services.length >= 8);
+    assert('3. Catálogo de Servicios /api/services', services.status === 200 && services.body.services.length >= 40);
 
     // 4. Login Cliente
     const loginClient = await makeRequest('POST', '/auth/login', {
@@ -92,12 +94,12 @@ async function runTestSuite() {
     assert('4. Login de Cliente (María González)', loginClient.status === 200 && loginClient.body.token != null);
     const clientToken = loginClient.body.token;
 
-    // 5. Login Admin
+    // 5. Login Admin General Oficial
     const loginAdmin = await makeRequest('POST', '/auth/login', {
-      email: 'admin@auraestetica.com',
+      email: 'admin@talitakumi.com',
       password: 'Admin123!'
     });
-    assert('5. Login de Administrador', loginAdmin.status === 200 && loginAdmin.body.user.role === 'ADMINISTRADOR');
+    assert('5. Login de Administrador General (admin@talitakumi.com)', loginAdmin.status === 200 && loginAdmin.body.user.role === 'ADMINISTRADOR');
     const adminToken = loginAdmin.body.token;
 
     // 6. Calendario: Lunes a Sábado disponible
@@ -130,9 +132,9 @@ async function runTestSuite() {
 
     assert('8. Creación de Reserva con cálculo de hora fin y notificación', 
       book1.status === 201 && 
+      book1.body.appointment != null &&
       book1.body.appointment.end_time != null &&
-      book1.body.confirmation != null &&
-      book1.body.confirmation.branch.includes('Sopocachi')
+      book1.body.appointment.branch_name.includes('Villa Fátima')
     );
     const createdAppointmentId = book1.body.appointment.id;
 
