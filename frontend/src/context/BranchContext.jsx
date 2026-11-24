@@ -1,69 +1,88 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../services/api';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from './AuthContext';
 
 const BranchContext = createContext(null);
 
+const ORDEN_SEDES = ['villa-fatima', 'upea', 'ceja', 'max-paredes'];
+
 export function BranchProvider({ children }) {
-  const [branches, setBranches] = useState([]);
-  const [selectedBranch, setSelectedBranch] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const { user, isEncargado } = useAuth();
+  const [sucursales, setSucursales] = useState([]);
+  const [sucursalActivaId, setSucursalActivaId] = useState('villa-fatima');
+  const [loadingBranches, setLoadingBranches] = useState(true);
 
   useEffect(() => {
-    async function loadBranches() {
-      try {
-        const res = await api.getBranches();
-        if (res.success && res.branches && res.branches.length > 0) {
-          setBranches(res.branches);
-
-          // Recuperar selección previa o usar Villa Fátima por defecto
-          const savedId = localStorage.getItem('htk_selected_branch_id');
-          const found = res.branches.find(b => String(b.id) === String(savedId));
-          const defaultBranch = found || res.branches[0];
-
-          setSelectedBranch(defaultBranch);
-        }
-      } catch (err) {
-        console.error('Error al cargar sucursales en BranchContext:', err);
-      } finally {
-        setLoading(false);
+    const unsub = onSnapshot(
+      collection(db, 'sucursales'),
+      (snap) => {
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => {
+            const ia = ORDEN_SEDES.indexOf(a.id);
+            const ib = ORDEN_SEDES.indexOf(b.id);
+            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+          });
+        setSucursales(list);
+        setLoadingBranches(false);
+      },
+      (err) => {
+        console.warn('[BranchContext] Error cargando sucursales:', err.message);
+        setLoadingBranches(false);
       }
-    }
-    loadBranches();
+    );
+    return () => unsub();
   }, []);
 
-  const selectBranch = (branchOrId) => {
-    let branch = null;
-    if (typeof branchOrId === 'object' && branchOrId !== null) {
-      branch = branchOrId;
-    } else {
-      branch = branches.find(b => String(b.id) === String(branchOrId));
-    }
+  const sucursalesActivas = useMemo(
+    () => sucursales.filter((s) => s.activa !== false),
+    [sucursales]
+  );
 
-    if (branch) {
-      setSelectedBranch(branch);
-      localStorage.setItem('htk_selected_branch_id', branch.id);
+  const sucursalesStaff = useMemo(() => {
+    if (!user) return [];
+    if (user.role === 'admin') return sucursales;
+    if (isEncargado) {
+      return sucursales.filter((s) => user.sucursales.includes(s.id));
     }
-  };
+    return [];
+  }, [user, isEncargado, sucursales]);
+
+  useEffect(() => {
+    if (isEncargado && sucursalesStaff.length > 0) {
+      if (!sucursalesStaff.some((s) => s.id === sucursalActivaId)) {
+        setSucursalActivaId(sucursalesStaff[0].id);
+      }
+    } else if (sucursalesActivas.length > 0 && !sucursalesActivas.some((s) => s.id === sucursalActivaId)) {
+      setSucursalActivaId(sucursalesActivas[0].id);
+    }
+  }, [isEncargado, sucursalesStaff, sucursalesActivas, sucursalActivaId]);
+
+  const sucursalActiva = useMemo(
+    () => sucursales.find((s) => s.id === sucursalActivaId) || sucursales[0] || null,
+    [sucursales, sucursalActivaId]
+  );
 
   return (
-    <BranchContext.Provider value={{
-      branches,
-      selectedBranch,
-      selectBranch,
-      loading,
-      isBranchModalOpen,
-      setIsBranchModalOpen
-    }}>
+    <BranchContext.Provider
+      value={{
+        sucursales,
+        sucursalesActivas,
+        sucursalesStaff,
+        sucursalActiva,
+        sucursalActivaId,
+        setSucursalActivaId,
+        loadingBranches,
+      }}
+    >
       {children}
     </BranchContext.Provider>
   );
 }
 
 export function useBranch() {
-  const context = useContext(BranchContext);
-  if (!context) {
-    throw new Error('useBranch debe ser utilizado dentro de un BranchProvider');
-  }
-  return context;
+  const ctx = useContext(BranchContext);
+  if (!ctx) throw new Error('useBranch debe usarse dentro de BranchProvider');
+  return ctx;
 }

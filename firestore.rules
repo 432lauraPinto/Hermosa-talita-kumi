@@ -1,0 +1,173 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Funciones auxiliares basadas en el perfil verificado users/{uid}
+    // =========================================================================
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function perfilPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function tienePerfilActivo() {
+      return autenticado()
+        && exists(perfilPath())
+        && get(perfilPath()).data.activo == true;
+    }
+
+    function rol() {
+      return tienePerfilActivo() ? get(perfilPath()).data.role : null;
+    }
+
+    function esAdmin() {
+      return rol() == 'admin';
+    }
+
+    function esStaff() {
+      return rol() == 'admin' || rol() == 'encargado';
+    }
+
+    function esStaffDe(sucursalId) {
+      return esAdmin() || (
+        rol() == 'encargado'
+        && get(perfilPath()).data.sucursales is list
+        && sucursalId in get(perfilPath()).data.sucursales
+      );
+    }
+
+    // =========================================================================
+    // Catálogo público (lectura pública, escritura solo admin)
+    // =========================================================================
+    match /sucursales/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /servicios/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /promociones/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /productos/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /faq/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /versiculos/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    // =========================================================================
+    // Usuarios: cada uno lee el suyo, staff lee todos.
+    // El cliente solo puede editar datos personales permitidos; role/activo/sucursales nunca desde cliente.
+    // =========================================================================
+    match /users/{uid} {
+      allow read: if autenticado() && (request.auth.uid == uid || esStaff());
+      allow create, delete: if false;
+      allow update: if tienePerfilActivo()
+        && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'nombre',
+          'telefono',
+          'sucursalPreferida',
+          'aceptaWhatsapp',
+          'fechaNacimiento',
+          'updatedAt'
+        ])
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.activo == resource.data.activo
+        && request.resource.data.sucursales == resource.data.sucursales
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() >= 4
+        && request.resource.data.nombre.size() <= 120
+        && request.resource.data.telefono is string
+        && request.resource.data.telefono.size() >= 8
+        && request.resource.data.telefono.size() <= 30
+        && (!('sucursalPreferida' in request.resource.data)
+            || request.resource.data.sucursalPreferida == null
+            || request.resource.data.sucursalPreferida is string)
+        && (!('aceptaWhatsapp' in request.resource.data)
+            || request.resource.data.aceptaWhatsapp is bool)
+        && (!('fechaNacimiento' in request.resource.data)
+            || request.resource.data.fechaNacimiento == null
+            || (request.resource.data.fechaNacimiento is string
+                && request.resource.data.fechaNacimiento.size() == 10));
+    }
+
+    // =========================================================================
+    // Operación: cliente dueño o staff de la sucursal. Escritura solo Functions.
+    // =========================================================================
+    match /citas/{id} {
+      allow read: if tienePerfilActivo() && (
+        resource.data.clienteId == request.auth.uid
+        || esStaffDe(resource.data.sucursalId)
+      );
+      allow write: if false;
+    }
+
+    match /tratamientos/{id} {
+      allow read: if tienePerfilActivo() && (
+        resource.data.clienteId == request.auth.uid
+        || esStaffDe(resource.data.sucursalId)
+      );
+      allow write: if false;
+    }
+
+    match /pagos/{id} {
+      allow read: if tienePerfilActivo() && (
+        resource.data.clienteId == request.auth.uid
+        || esStaffDe(resource.data.sucursalId)
+      );
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // Inventario y movimientos: solo personal de la sucursal. Escritura bloqueada.
+    // =========================================================================
+    match /inventario/{id} {
+      allow read: if tienePerfilActivo() && esStaffDe(resource.data.sucursalId);
+      allow write: if false;
+    }
+
+    match /movimientos/{id} {
+      allow read: if tienePerfilActivo() && esStaffDe(resource.data.sucursalId);
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // Auditoría y chats: solo admin. Escritura bloqueada desde navegador.
+    // =========================================================================
+    match /auditoria/{id} {
+      allow read: if esAdmin();
+      allow write: if false;
+    }
+
+    match /chats/{id} {
+      allow read: if esAdmin();
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // Todo lo demás queda denegado (incluyendo locks internos agendaLocks)
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "HTK – Stock bajo",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 8 * * 1-6"
+            }
+          ]
+        }
+      },
+      "id": "htk-stk-cron",
+      "name": "Cron Diario 08:30 (Lun-Sáb)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/stock-bajo",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "htk-stk-get",
+      "name": "GET /stock-bajo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json || {};\nconst alertas = Array.isArray(data.alertas) ? data.alertas : [];\nif (alertas.length === 0) return [];\nconst lineas = alertas.map((a) => `• ${a.sucursalNombre} — ${a.productoNombre}: ${a.stock} u. (mínimo: ${a.stockMinimo})`);\nreturn [{\n  json: {\n    totalAlertas: alertas.length,\n    resumenAdmin: `Alerta de stock bajo en HERMOSA TALITA KUMI (${alertas.length} ítems):\\n` + lineas.join('\\n')\n  }\n}];"
+      },
+      "id": "htk-stk-format",
+      "name": "Armar Alerta para Admin",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Cron Diario 08:30 (Lun-Sáb)": {
+      "main": [[{ "node": "GET /stock-bajo", "type": "main", "index": 0 }]]
+    },
+    "GET /stock-bajo": {
+      "main": [[{ "node": "Armar Alerta para Admin", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "timezone": "America/La_Paz"
+  }
+}

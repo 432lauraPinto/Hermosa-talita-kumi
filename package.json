@@ -1,0 +1,22 @@
+{
+  "name": "hermosa-talita-kumi",
+  "version": "2.0.0",
+  "private": true,
+  "description": "HERMOSA TALITA KUMI — Sistema Web Integral con Firebase (Auth, Firestore, Cloud Functions v2, Hosting) y n8n",
+  "scripts": {
+    "install:all": "npm install && npm --prefix functions install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "emulators": "firebase emulators:start --import=./emulator-data --export-on-exit",
+    "seed": "node scripts/seed.js",
+    "test:unit": "node --test tests/slots.test.js tests/validators.test.js",
+    "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.js\"",
+    "test:integration": "firebase emulators:exec --only auth,firestore,functions \"node --test tests/integration.test.js\"",
+    "test": "npm run test:unit && npm run test:rules && npm run test:integration"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0"
+  }
+}

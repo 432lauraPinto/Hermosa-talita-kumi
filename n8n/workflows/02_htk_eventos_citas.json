@@ -1,0 +1,52 @@
+{
+  "name": "HTK – Eventos de citas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "htk-eventos-citas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "htk-ev-webhook",
+      "name": "Webhook Eventos de Citas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "htk-eventos-citas"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\nconst cita = body.cita || {};\nconst tipo = body.tipoEvento || 'evento';\nconst [y, m, d] = String(cita.fecha || '').split('-');\nconst fechaBO = d && m && y ? `${d}/${m}/${y}` : (cita.fecha || '');\n\nconst titulos = {\n  cita_creada: 'Nueva cita registrada',\n  cita_confirmada: 'Tu cita fue confirmada',\n  cita_cancelada: 'Aviso de cancelación de cita'\n};\n\nconst titulo = titulos[tipo] || 'Actualización de cita';\nconst mensajeCliente = `Hola ${cita.clienteNombre || 'cliente'}, ${titulo.toLowerCase()} en HERMOSA TALITA KUMI (${cita.sucursalNombre}) para ${cita.servicioNombre} el ${fechaBO} a las ${cita.hora}.`;\nconst mensajeEncargado = `[${titulo}] Sucursal ${cita.sucursalNombre}: ${cita.clienteNombre} (${cita.clienteTelefono || 'sin teléfono'}) — ${cita.servicioNombre}, ${fechaBO} ${cita.hora} (Estado: ${cita.estado}).`;\n\nreturn [{\n  json: {\n    tipoEvento: tipo,\n    citaId: body.citaId,\n    telefonoCliente: cita.clienteTelefono || '',\n    whatsappSucursal: cita.sucursalWhatsapp || '',\n    mensajeCliente,\n    mensajeEncargado\n  }\n}];"
+      },
+      "id": "htk-ev-format",
+      "name": "Formatear Mensajes (Cliente y Encargado)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": true,\n  \"procesado\": true,\n  \"tipoEvento\": \"{{ $json.tipoEvento }}\",\n  \"citaId\": \"{{ $json.citaId }}\"\n}",
+        "options": {}
+      },
+      "id": "htk-ev-respond",
+      "name": "Confirmar Recepción",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Eventos de Citas": {
+      "main": [[{ "node": "Formatear Mensajes (Cliente y Encargado)", "type": "main", "index": 0 }]]
+    },
+    "Formatear Mensajes (Cliente y Encargado)": {
+      "main": [[{ "node": "Confirmar Recepción", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "timezone": "America/La_Paz"
+  }
+}

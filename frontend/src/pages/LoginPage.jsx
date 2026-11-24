@@ -1,359 +1,294 @@
 import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { USE_EMULATORS } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, Lock, Mail, AlertCircle, Shield, User, KeyRound, ArrowRight } from 'lucide-react';
+import { traducirErrorAuth } from '../utils/authErrors';
+import { validarEmail } from '../utils/validators';
+import { LogIn, KeyRound, Eye, EyeOff, Mail, X } from 'lucide-react';
 
-export default function LoginPage({ onNavigate, navParams = {} }) {
-  const { login, confirmMFALogin } = useAuth();
+const CUENTAS_DEMO = [
+  { label: 'Admin General', email: 'admin@talitakumi.com', pass: 'Admin123!' },
+  { label: 'Encargada Villa Fátima', email: 'encargado.villafatima@talitakumi.com', pass: 'Encargado123!' },
+  { label: 'Encargada UPEA', email: 'encargado.upea@talitakumi.com', pass: 'Encargado123!' },
+  { label: 'Cliente Demo', email: 'cliente@talitakumi.com', pass: 'Cliente123!' },
+];
+
+export default function LoginPage() {
+  const { login, resetPassword, authNotice, clearAuthNotice } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  // Estado para paso 2FA
-  const [mfaState, setMfaState] = useState({ required: false, tempToken: '', code: '' });
+  // Modal recuperación de contraseña
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMsg, setResetMsg] = useState('');
+  const [resetError, setResetError] = useState('');
 
-  const handlePostLoginRedirect = (resUser) => {
-    const bookingCtx = sessionStorage.getItem('htk_booking_context');
-    let savedBooking = null;
-    if (bookingCtx) {
-      try { savedBooking = JSON.parse(bookingCtx); } catch (e) {}
-    }
-
-    if (resUser && (resUser.role === 'ADMINISTRADOR' || resUser.role === 'ADMIN_GENERAL' || resUser.role === 'ENCARGADO')) {
-      onNavigate('admin-dashboard');
-    } else if (navParams.returnTo === 'booking' || savedBooking) {
-      sessionStorage.removeItem('htk_booking_context');
-      onNavigate('booking', {
-        ...(savedBooking || {}),
-        ...(navParams || {})
-      });
-    } else {
-      onNavigate('profile');
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    clearAuthNotice();
 
-    if (!email || !password) {
-      setError('Por favor completa todos los campos.');
+    const checkMail = validarEmail(email);
+    if (!checkMail.valido) {
+      setError(checkMail.motivo);
       return;
     }
 
+    setSubmitting(true);
     try {
-      setLoading(true);
-      const res = await login(email, password);
-      if (res && res.mfaRequired) {
-        setMfaState({ required: true, tempToken: res.tempToken, code: '' });
+      const { profile } = await login(checkMail.valor, password);
+      const role = profile?.role || 'cliente';
+      const from = location.state?.from;
+
+      if (role === 'admin' || role === 'encargado') {
+        const destino = from && from.startsWith('/panel') ? from : '/panel';
+        navigate(destino, { replace: true });
       } else {
-        handlePostLoginRedirect(res);
+        const destino =
+          from && from !== '/login' && from !== '/registro' && !from.startsWith('/panel')
+            ? from
+            : '/mis-citas';
+        navigate(destino, { replace: true });
       }
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión. Revisa tus credenciales.');
+      setError(traducirErrorAuth(err));
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
-  };
+  }
 
-  const handleVerifyMFA = async (e) => {
+  async function handleResetSubmit(e) {
     e.preventDefault();
-    setError('');
+    setResetError('');
+    setResetMsg('');
 
-    if (!mfaState.code || mfaState.code.trim().length < 6) {
-      setError('Por favor ingresa tu código de 6 dígitos o código de respaldo.');
+    const checkMail = validarEmail(resetEmail);
+    if (!checkMail.valido) {
+      setResetError(checkMail.motivo);
       return;
     }
 
+    setResetLoading(true);
     try {
-      setLoading(true);
-      const user = await confirmMFALogin(mfaState.tempToken, mfaState.code.trim());
-      handlePostLoginRedirect(user);
+      await resetPassword(checkMail.valor);
+      // Mensaje neutral anti-enumeración de cuentas
+      setResetMsg(
+        'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.'
+      );
     } catch (err) {
-      setError(err.message || 'Código de seguridad incorrecto.');
+      if (err?.code === 'auth/user-not-found') {
+        setResetMsg(
+          'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.'
+        );
+      } else {
+        setResetError(traducirErrorAuth(err));
+      }
     } finally {
-      setLoading(false);
+      setResetLoading(false);
     }
-  };
-
-  const handleDemoFill = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError('');
-  };
+  }
 
   return (
-    <div style={{
-      maxWidth: '480px',
-      margin: '3.5rem auto',
-      padding: '0 1.5rem'
-    }} className="animate-fade-in">
-      <div className="card-elegant card-gold-border" style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '24px',
-        padding: '2.5rem',
-        boxShadow: '0 15px 40px rgba(196, 106, 134, 0.15)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img
-            src="/logo-talitakumi.png"
-            alt="Hermosa Talita Kumi"
-            style={{
-              width: '85px',
-              height: '85px',
-              borderRadius: '50%',
-              margin: '0 auto 1rem',
-              display: 'block',
-              boxShadow: '0 6px 20px rgba(184, 134, 11, 0.25)',
-              border: '2px solid var(--color-gold)'
-            }}
-          />
-
-          <h2 style={{ fontSize: '1.8rem', fontFamily: "'Playfair Display', Georgia, serif", fontWeight: '900', color: 'var(--color-text-dark)' }}>
-            {mfaState.required ? 'Verificación de Seguridad (2FA)' : 'Iniciar Sesión'}
-          </h2>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem', marginTop: '0.3rem' }}>
-            Centro Estético Cristiano Hermosa Talita Kumi
+    <div className="container" style={{ padding: '3rem 1.5rem', maxWidth: '500px' }}>
+      <div className="card-elegant" style={{ padding: '2.2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.9rem', color: '#C46A86' }}>Iniciar sesión</h1>
+          <p style={{ color: '#6C525F', fontSize: '0.92rem' }}>
+            Accede a tus citas, historial o panel administrativo.
           </p>
         </div>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#FFEBEE',
-            color: '#C62828',
-            padding: '0.85rem 1rem',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            fontSize: '0.88rem'
-          }}>
-            <AlertCircle size={18} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* PASO 2: VERIFICACIÓN TOTP 2FA */}
-        {mfaState.required ? (
-          <form onSubmit={handleVerifyMFA}>
-            <div style={{
-              backgroundColor: '#FDF1F4',
-              padding: '1rem',
-              borderRadius: '12px',
-              border: '1px solid #F6C6D3',
-              marginBottom: '1.5rem',
-              fontSize: '0.88rem',
-              color: '#444444'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#C46A86', fontWeight: '800', marginBottom: '0.3rem' }}>
-                <KeyRound size={18} /> Código Autenticador TOTP
-              </div>
-              Ingresa el código de 6 dígitos generado por tu aplicación de autenticación (Google Authenticator, Authy) o un código de respaldo.
-            </div>
-
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label" style={{ fontWeight: '700' }}>Código de 6 dígitos</label>
-              <input
-                type="text"
-                maxLength={9}
-                value={mfaState.code}
-                onChange={(e) => setMfaState(prev => ({ ...prev, code: e.target.value }))}
-                placeholder="000000 o A1B2-C3D4"
-                className="form-control"
-                style={{
-                  textAlign: 'center',
-                  fontSize: '1.4rem',
-                  letterSpacing: '4px',
-                  fontWeight: '800',
-                  padding: '0.75rem'
-                }}
-                autoFocus
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: '0.85rem', fontSize: '1rem', marginBottom: '0.75rem' }}
-            >
-              {loading ? 'Verificando código...' : 'Verificar e Ingresar'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMfaState({ required: false, tempToken: '', code: '' })}
-              style={{ width: '100%', color: 'var(--color-text-muted)', fontSize: '0.85rem', padding: '0.5rem' }}
-            >
-              ← Volver al login normal
-            </button>
-          </form>
-        ) : (
-          /* PASO 1: LOGIN NORMAL CON EMAIL Y CONTRASEÑA */
-          <form onSubmit={handleSubmit}>
-            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label" style={{ fontWeight: '700', fontSize: '0.9rem' }}>Correo Electrónico</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ejemplo@correo.com"
-                  className="form-control"
-                  style={{ paddingLeft: '2.5rem' }}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label" style={{ fontWeight: '700', fontSize: '0.9rem' }}>Contraseña</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="form-control"
-                  style={{ paddingLeft: '2.5rem' }}
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: '0.85rem', fontSize: '1rem' }}
-            >
-              {loading ? 'Validando credenciales...' : 'Ingresar a la Plataforma'}
-            </button>
-          </form>
-        )}
-
-        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--color-text-muted)' }}>
-          ¿No tienes una cuenta aún?{' '}
-          <button
-            onClick={() => onNavigate('register')}
-            style={{ color: 'var(--color-mauve)', fontWeight: '700', textDecoration: 'underline' }}
+        {(error || authNotice) && (
+          <div
+            className="badge badge-danger"
+            style={{ display: 'block', padding: '0.8rem 1rem', borderRadius: '12px', marginBottom: '1rem' }}
           >
-            Regístrate aquí
+            {error || authNotice}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.86rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              className="form-control"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="correo@ejemplo.com"
+            />
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+              <label style={{ fontSize: '0.86rem', fontWeight: 700 }}>Contraseña</label>
+              <button
+                type="button"
+                onClick={() => {
+                  setResetEmail(email);
+                  setResetMsg('');
+                  setResetError('');
+                  setResetOpen(true);
+                }}
+                style={{ fontSize: '0.8rem', color: '#9F3E5E', fontWeight: 700, textDecoration: 'underline' }}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPass ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{ paddingRight: '2.8rem' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((v) => !v)}
+                aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{
+                  position: 'absolute',
+                  right: '0.8rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#6C525F',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" disabled={submitting} className="btn-primary" style={{ width: '100%' }}>
+            <LogIn size={17} /> {submitting ? 'Ingresando...' : 'Ingresar'}
           </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1.2rem', fontSize: '0.9rem', color: '#6C525F' }}>
+          ¿No tienes cuenta?{' '}
+          <Link to="/registro" style={{ color: '#C46A86', fontWeight: 800 }}>
+            Regístrate aquí
+          </Link>
         </div>
 
-        {/* DEMO ACCOUNTS QUICK-FILL CARDS */}
-        <div style={{
-          marginTop: '2.5rem',
-          paddingTop: '1.5rem',
-          borderTop: '1px solid var(--color-border)'
-        }}>
-          <div style={{
-            fontSize: '0.78rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            color: 'var(--color-gold)',
-            fontWeight: '700',
-            textAlign: 'center',
-            marginBottom: '0.85rem'
-          }}>
-            Cuentas Oficiales y de Demostración
+        {/* Accesos rápidos visibles ÚNICAMENTE en modo emulador local */}
+        {USE_EMULATORS && (
+          <div style={{ marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px dashed #E5B9C7' }}>
+            <div
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                color: '#B8860B',
+                marginBottom: '0.6rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <KeyRound size={14} /> Accesos demo del emulador local (seed.js)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              {CUENTAS_DEMO.map((c) => (
+                <button
+                  key={c.email}
+                  type="button"
+                  onClick={() => {
+                    setEmail(c.email);
+                    setPassword(c.pass);
+                    setError('');
+                  }}
+                  style={{
+                    textAlign: 'left',
+                    padding: '0.5rem 0.7rem',
+                    borderRadius: '10px',
+                    border: '1px solid #F6C6D3',
+                    backgroundColor: '#FFF9F6',
+                    fontSize: '0.78rem',
+                    color: '#4A3B43',
+                  }}
+                >
+                  <div style={{ fontWeight: 800, color: '#9F3E5E' }}>{c.label}</div>
+                  <div style={{ fontSize: '0.7rem', opacity: 0.85, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {c.email}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <button
-              type="button"
-              onClick={() => handleDemoFill('admin@talitakumi.com', 'Admin123!')}
-              style={{
-                backgroundColor: 'var(--color-floral)',
-                border: '1px solid var(--color-champagne)',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Shield size={16} color="var(--color-gold)" />
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--color-text-dark)' }}>
-                    Administradora General (Jefes)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                    admin@talitakumi.com
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--color-gold)' }}>Auto-llenar</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDemoFill('encargado.lapaz@talitakumi.com', 'Admin123!')}
-              style={{
-                backgroundColor: '#F9F5FF',
-                border: '1px solid #E9D7FE',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Shield size={16} color="#7F56D9" />
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--color-text-dark)' }}>
-                    Encargado de Sucursal (Villa Fátima / Max Paredes)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                    encargado.lapaz@talitakumi.com
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.72rem', fontWeight: '600', color: '#7F56D9' }}>Auto-llenar</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDemoFill('maria.gonzalez@example.com', 'Cliente123!')}
-              style={{
-                backgroundColor: 'var(--color-blush)',
-                border: '1px solid var(--color-rose-pastel)',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-sm)',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <User size={16} color="var(--color-mauve)" />
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--color-text-dark)' }}>
-                    Cliente (María González)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                    maria.gonzalez@example.com
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--color-mauve)' }}>Auto-llenar</span>
-            </button>
-          </div>
-        </div>
+        )}
       </div>
+
+      {/* Modal recuperación de contraseña */}
+      {resetOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ padding: '1.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h2 style={{ color: '#C46A86', fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Mail size={20} /> Restablecer contraseña
+              </h2>
+              <button type="button" onClick={() => setResetOpen(false)} aria-label="Cerrar">
+                <X size={20} color="#6C525F" />
+              </button>
+            </div>
+            <p style={{ fontSize: '0.9rem', color: '#6C525F', marginBottom: '1rem' }}>
+              Ingresa tu correo electrónico registrado y te enviaremos un enlace seguro para crear una nueva contraseña.
+            </p>
+
+            {resetError && (
+              <div className="badge badge-danger" style={{ display: 'block', padding: '0.7rem 0.9rem', borderRadius: '10px', marginBottom: '0.9rem' }}>
+                {resetError}
+              </div>
+            )}
+            {resetMsg && (
+              <div className="badge badge-success" style={{ display: 'block', padding: '0.75rem 0.95rem', borderRadius: '10px', marginBottom: '0.9rem' }}>
+                {resetMsg}
+                {USE_EMULATORS && (
+                  <div style={{ fontSize: '0.76rem', marginTop: '0.35rem', fontWeight: 600 }}>
+                    En el emulador local puedes ver el enlace generado en la consola del emulador de Firebase.
+                  </div>
+                )}
+              </div>
+            )}
+
+            <form onSubmit={handleResetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+              <input
+                type="email"
+                required
+                className="form-control"
+                placeholder="correo@ejemplo.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                <button type="button" onClick={() => setResetOpen(false)} className="btn-secondary">
+                  Cerrar
+                </button>
+                <button type="submit" disabled={resetLoading} className="btn-primary">
+                  {resetLoading ? 'Enviando...' : 'Enviar enlace'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

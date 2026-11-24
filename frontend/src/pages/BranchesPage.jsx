@@ -1,253 +1,120 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useBranch } from '../context/BranchContext';
-import { 
-  MapPin, MessageCircle, Clock, Navigation, ExternalLink, Info, Compass
-} from 'lucide-react';
+import { whatsappUrl } from '../utils/format';
+import { MapPin, Clock, MessageCircle, Navigation, Users, Calendar } from 'lucide-react';
+
+const DIAS_LABEL = { 0: 'Dom', 1: 'Lun', 2: 'Mar', 3: 'Mié', 4: 'Jue', 5: 'Vie', 6: 'Sáb' };
 
 export default function BranchesPage() {
-  const { branches } = useBranch();
+  const { sucursalesActivas } = useBranch();
 
-  // Coordenadas o enlaces referenciales para Google Maps Embed (Módulo 06)
-  const getMapEmbedSrc = (branch) => {
-    if (branch.map_embed_url) return branch.map_embed_url;
-    // Embed interactivo por búsqueda oficial o coordenadas por sede
-    const query = encodeURIComponent(`Hermosa Talita Kumi ${branch.name} ${branch.city} Bolivia`);
-    return `https://maps.google.com/maps?q=${query}&z=15&output=embed`;
-  };
-
-  // Enlace "Cómo llegar" a Google Maps Directions (Módulo 06)
-  const getDirectionsUrl = (branch) => {
-    if (branch.google_maps_url) return branch.google_maps_url;
-    const dest = encodeURIComponent(`Hermosa Talita Kumi ${branch.name} ${branch.city} Bolivia`);
-    return `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
-  };
-
-  // Botón "Escribir por WhatsApp" central único (+591 62353452 - Módulo 07)
-  const getWhatsAppLink = (branch) => {
-    const rawNumber = (branch.whatsapp || '62353452').replace(/[^0-9]/g, '');
-    const cleanNumber = rawNumber.startsWith('591') ? rawNumber : `591${rawNumber}`;
-    const textMsg = encodeURIComponent(
-      `Hola, quisiera consultar los servicios y horarios de la sucursal ${branch.name} de Talita Kumi.`
-    );
-    return `https://wa.me/${cleanNumber}?text=${textMsg}`;
-  };
+  function formatearDias(dias = [1, 2, 3, 4, 5, 6]) {
+    if (dias.length === 6 && !dias.includes(0)) return 'Lunes a Sábado';
+    return dias.map((d) => DIAS_LABEL[d] || d).join(', ');
+  }
 
   return (
-    <div style={{ backgroundColor: '#FFF8F0', minHeight: '100vh', padding: '3.5rem 1.5rem', color: '#333333' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
-        {/* Cabecera Informativa Oficial */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{ color: '#B8860B', fontWeight: '800', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>
-            Área Metropolitana de La Paz y El Alto
-          </div>
-          <h1 style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: '2.5rem',
-            color: '#C46A86',
-            margin: '0 0 0.6rem 0',
-            fontWeight: '900'
-          }}>
-            NUESTRAS SUCURSALES
-          </h1>
-          <p style={{ color: '#666666', fontSize: '1.05rem', maxWidth: '750px', margin: '0 auto', lineHeight: 1.6 }}>
-            Información de ubicación, horarios de atención y mapas interactivos de nuestras cuatro sedes oficiales.
-          </p>
+    <div className="container" style={{ padding: '2.5rem 1.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <span className="badge badge-gold">La Paz y El Alto, Bolivia</span>
+        <h1 style={{ fontSize: '2.3rem', color: '#C46A86', marginTop: '0.5rem' }}>Nuestras 4 Sucursales</h1>
+        <p style={{ color: '#6C525F', maxWidth: '680px', margin: '0.4rem auto 0' }}>
+          Encuentra dirección, horario de atención, capacidad simultánea y contacto directo por WhatsApp de cada sede.
+        </p>
+      </div>
 
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            backgroundColor: '#FDF1F4',
-            border: '1.5px solid #F6C6D3',
-            padding: '0.65rem 1.25rem',
-            borderRadius: '25px',
-            marginTop: '1.25rem',
-            fontSize: '0.88rem',
-            color: '#C46A86'
-          }}>
-            <Info size={18} color="#C46A86" style={{ flexShrink: 0 }} />
-            <span>
-              Página exclusivamente informativa. Las citas se reservan únicamente en la sección <strong>Agendar cita</strong>.
-            </span>
-          </div>
-        </div>
-
-        {/* 4 Secciones Independientes por Sucursal (Orden estricto V12) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
-          {branches.map((branch, index) => (
-            <section
-              key={branch.id || index}
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderRadius: '24px',
-                border: '1.5px solid #F6C6D3',
-                boxShadow: '0 10px 30px rgba(196, 106, 134, 0.08)',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
-              }}
-            >
-              {/* 1. Nombre de la Sucursal */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #FFF8F0', paddingBottom: '1rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#B8860B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Sucursal Oficial • Municipio de {branch.city || branch.municipio || 'La Paz'}
-                  </div>
-                  <h2 style={{
-                    fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: '2rem',
-                    color: '#C46A86',
-                    margin: '0.2rem 0 0 0',
-                    fontWeight: '800'
-                  }}>
-                    {branch.name}
-                  </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {sucursalesActivas.map((s) => (
+          <section key={s.id} className="card-elegant" style={{ padding: '1.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', borderBottom: '1px solid #FDF1F4', paddingBottom: '0.9rem' }}>
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#B8860B', textTransform: 'uppercase' }}>
+                  Ciudad de {s.ciudad}
                 </div>
-                <div style={{
-                  backgroundColor: '#FFF8F0',
-                  color: '#B8860B',
-                  border: '1px solid #F7DFA8',
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: '20px',
-                  fontSize: '0.8rem',
-                  fontWeight: '700'
-                }}>
-                  Atención Lunes a Sábado
+                <h2 style={{ fontSize: '1.8rem', color: '#C46A86' }}>{s.nombre}</h2>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span className="badge badge-gold">
+                  <Users size={13} /> Capacidad: {s.capacidad || 2} especialistas simultáneos
+                </span>
+                <span className="badge badge-mauve">Intervalos cada {s.horario?.slotMin || 30} min</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <MapPin size={20} color="#C46A86" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem' }}>Dirección</div>
+                    <div style={{ color: '#6C525F', fontSize: '0.92rem' }}>{s.direccion}</div>
+                    {s.referencia && <div style={{ color: '#8A6F7D', fontSize: '0.84rem' }}>Ref: {s.referencia}</div>}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <Clock size={20} color="#B8860B" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem' }}>Horario de atención (America/La_Paz)</div>
+                    <div style={{ color: '#6C525F', fontSize: '0.92rem' }}>
+                      {formatearDias(s.horario?.dias)}: {s.horario?.apertura || '08:30'} – {s.horario?.cierre || '19:30'}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
+                  <a
+                    href={whatsappUrl(s.whatsapp, `Hola, quisiera consultar disponibilidad en la sucursal ${s.nombre} de HERMOSA TALITA KUMI.`)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-whatsapp-pulse"
+                    style={{
+                      backgroundColor: '#25D366',
+                      color: '#FFF',
+                      padding: '0.72rem 1.35rem',
+                      borderRadius: '999px',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                    }}
+                  >
+                    <MessageCircle size={17} /> WhatsApp ({s.whatsapp})
+                  </a>
+
+                  <Link to={`/reservar?sucursalId=${s.id}`} className="btn-primary" style={{ padding: '0.72rem 1.35rem', fontSize: '0.9rem' }}>
+                    <Calendar size={16} /> Reservar aquí
+                  </Link>
+
+                  {s.googleMapsUrl && (
+                    <a
+                      href={s.googleMapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-secondary"
+                      style={{ padding: '0.7rem 1.2rem', fontSize: '0.88rem' }}
+                    >
+                      <Navigation size={15} /> Cómo llegar
+                    </a>
+                  )}
                 </div>
               </div>
 
-              {/* 2. Mapa Interactivo de Google Maps (Grande, responsive, dentro de su propio recuadro) */}
-              <div style={{
-                borderRadius: '16px',
-                overflow: 'hidden',
-                border: '2px solid #F7DFA8',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
-                backgroundColor: '#F5F5DC',
-                position: 'relative'
-              }}>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '2px solid #F7DFA8', minHeight: '240px' }}>
                 <iframe
-                  title={`Mapa de la sucursal ${branch.name}`}
-                  src={getMapEmbedSrc(branch)}
+                  title={`Mapa ${s.nombre}`}
+                  src={s.mapEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent(s.nombre + ' ' + s.ciudad + ' Bolivia')}&z=15&output=embed`}
                   width="100%"
-                  height="340"
+                  height="250"
                   style={{ border: 0, display: 'block' }}
-                  allowFullScreen=""
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
                 />
-                <div style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  left: '10px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.92)',
-                  color: '#888888',
-                  padding: '0.25rem 0.65rem',
-                  borderRadius: '12px',
-                  fontSize: '0.72rem',
-                  fontWeight: '600'
-                }}>
-                  Ubicación referencial DEMO — confirmar dirección oficial
-                </div>
               </div>
-
-              {/* 3. Dirección */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-                <MapPin size={22} color="#C46A86" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', color: '#333333', fontSize: '0.95rem' }}>Dirección</div>
-                  <div style={{ color: '#555555', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                    {branch.address || 'Ubicación pendiente de confirmar'}
-                  </div>
-                </div>
-              </div>
-
-              {/* 4. Referencia */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-                <Compass size={22} color="#B8860B" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', color: '#333333', fontSize: '0.95rem' }}>Referencia</div>
-                  <div style={{ color: '#555555', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                    {branch.zone || branch.referencia || 'Cerca de una parada de transporte público [DEMO]'}
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. Horario General */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
-                <Clock size={22} color="#C46A86" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', color: '#333333', fontSize: '0.95rem' }}>Horario General</div>
-                  <div style={{ color: '#555555', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                    {branch.opening_hours || 'Lunes a Sábado: 08:30 - 19:30 | Domingos cerrado para descanso'}
-                  </div>
-                </div>
-              </div>
-
-              {/* 6. WhatsApp Central y 7. Enlace "Cómo llegar" */}
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                marginTop: '0.5rem',
-                paddingTop: '1.25rem',
-                borderTop: '1px solid #FFF8F0'
-              }}>
-                {/* 6. Botón Escribir por WhatsApp */}
-                <a
-                  href={getWhatsAppLink(branch)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: '#25D366',
-                    color: '#FFFFFF',
-                    padding: '0.75rem 1.4rem',
-                    borderRadius: '25px',
-                    fontWeight: '700',
-                    fontSize: '0.92rem',
-                    textDecoration: 'none',
-                    boxShadow: '0 4px 12px rgba(37, 211, 102, 0.25)',
-                    transition: 'all 0.2s ease'
-                  }}
-                  aria-label={`Escribir por WhatsApp a la sucursal ${branch.name}`}
-                >
-                  <MessageCircle size={18} />
-                  Escribir por WhatsApp
-                </a>
-
-                {/* 7. Enlace Cómo llegar (Abre Google Maps con ruta) */}
-                <a
-                  href={getDirectionsUrl(branch)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: '#FFF8F0',
-                    color: '#B8860B',
-                    border: '1.5px solid #F7DFA8',
-                    padding: '0.75rem 1.4rem',
-                    borderRadius: '25px',
-                    fontWeight: '700',
-                    fontSize: '0.92rem',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <Navigation size={18} />
-                  Cómo llegar
-                  <ExternalLink size={14} style={{ marginLeft: '2px' }} />
-                </a>
-              </div>
-            </section>
-          ))}
-        </div>
-
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );

@@ -1,166 +1,118 @@
-# HERMOSA TALITA KUMI — Sistema Web Integral
+# HERMOSA TALITA KUMI — Sistema Web Integral (Firebase Local + n8n)
 
-Plataforma web funcional, moderna y segura para el centro estético **HERMOSA TALITA KUMI**, con administración centralizada para cuatro sucursales en el departamento de La Paz, Bolivia:
-1. **Villa Fátima** (Ciudad de La Paz) — WhatsApp: +591 77197857
-2. **UPEA** (Ciudad de El Alto) — WhatsApp: +591 79688750
-3. **Ceja** (Ciudad de El Alto) — WhatsApp: +591 76230119
-4. **Max Paredes** (Ciudad de La Paz) — WhatsApp: +591 77197857
+Plataforma web integral para el centro estético **HERMOSA TALITA KUMI**, con gestión centralizada para las **4 sucursales** en La Paz y El Alto, Bolivia:
 
----
+1. **Villa Fátima** (La Paz) — WhatsApp: `+591 77197857`
+2. **UPEA – El Alto** (El Alto) — WhatsApp: `+591 79688750`
+3. **Ceja – El Alto** (El Alto) — WhatsApp: `+591 76230119`
+4. **Max Paredes** (La Paz) — WhatsApp: `+591 77197857`
 
-## 1. Tecnologías Obligatorias
-
-* **Frontend:** React, JavaScript, HTML5, CSS3, Vite, React Router, Lucide Icons.
-* **Backend:** Node.js con Express.js (Controladores, Middlewares, Rutas, Servicios, Validadores, Tiempo Real SSE).
-* **Base de Datos:** MySQL 8.0 (con motor dual de desarrollo transparente SQLite para ejecución local sin Docker).
-* **Automatización:** n8n (flujos de procesos y agente conversacional de IA).
-* **Inteligencia Artificial:** OpenAI API / Proveedor compatible configurado por variable de entorno.
-* **Tiempo Real:** Server-Sent Events (SSE) desde Express con alertas sonoras Web Audio API.
-* **Contenedores:** Docker y Docker Compose (red aislada `htk_net`, volúmenes persistentes, healthchecks).
-* **Control de Versiones:** Git y GitHub.
+Arquitectura basada en **Firebase (Auth + Firestore + Cloud Functions v2 + Hosting)** ejecutándose localmente en el **Firebase Local Emulator Suite** (`demo-hermosa-talita-kumi`, sin cuenta ni tarjeta) e integración desacoplada con **n8n** para el chatbot con IA, notificaciones y recordatorios.
 
 ---
 
-## 2. Localización y Formatos
+## 1. Requisitos
 
-* **Zona Horaria:** `America/La_Paz` (UTC-4, sin horario de verano) en contenedores, base de datos y Node.js.
-* **Idioma:** Español (Bolivia) centralizado en toda la plataforma.
-* **Moneda:** Bolivianos (`Bs`), siempre con dos decimales (`DECIMAL(10,2)`).
-* **Formato de Fecha:** `DD/MM/AAAA`.
-* **Formato de Hora:** Formato de 24 horas (`HH:mm`).
+- **Node.js 20+** y **Java 11+** (requerido por el emulador de Firestore).
+- **Git** y **Firebase CLI**: `npm i -g firebase-tools`
+- **n8n (opcional en local, el chatbot cuenta con motor de reglas de respaldo):**
+  ```bash
+  docker run -it --rm -p 5678:5678 \
+    -e GENERIC_TIMEZONE=America/La_Paz \
+    -e TZ=America/La_Paz \
+    -v n8n_data:/home/node/.n8n \
+    n8nio/n8n
+  ```
+- Una API key de OpenAI (o compatible) para el nodo AI Agent de n8n.
 
 ---
 
-## 3. Estructura del Proyecto
+## 2. Estructura del proyecto
 
 ```
 hermosa-talita-kumi/
-├── frontend/
-│   ├── public/            (robots.txt, sitemap.xml, imágenes, logo oficial, sonido de alerta)
+├── firebase.json            (auth 9099, firestore 8080, functions 5001, hosting 5000, UI 4000)
+├── .firebaserc              (proyecto "demo-hermosa-talita-kumi")
+├── firestore.rules          (cliente solo lee; toda escritura operativa pasa por Functions)
+├── firestore.indexes.json   (índices compuestos para citas, movimientos, tratamientos y pagos)
+├── functions/               (Node 20, firebase-functions v2, región southamerica-east1)
+│   ├── .env.example
+│   ├── .env                 (N8N_WEBHOOK_URL, N8N_EVENTOS_WEBHOOK_URL, N8N_API_KEY)
+│   ├── index.js
 │   └── src/
-│       ├── assets/        (imágenes y recursos estáticos)
-│       ├── components/    (componentes visuales reutilizables)
-│       ├── pages/         (páginas principales y vistas de rol)
-│       ├── layouts/       (diseño estructural y layouts de navegación)
-│       ├── services/      (llamadas API Axios/Fetch al backend)
-│       ├── hooks/         (custom hooks de React)
-│       ├── context/       (contextos de autenticación, sucursal activa y carrito)
-│       ├── routes/        (enrutamiento protegido por rol)
-│       └── styles/        (estilos CSS y paleta de colores)
-├── backend/
-│   ├── src/
-│   │   ├── config/        (conexión a base de datos, variables y constantes)
-│   │   ├── controllers/   (controladores REST HTTP)
-│   │   ├── middlewares/   (autenticación JWT, verificación de roles, helmet, rate-limit)
-│   │   ├── models/        (definiciones de datos y consultas SQL)
-│   │   ├── routes/        (declaración modular de rutas)
-│   │   ├── services/      (lógica de negocio pura, transacciones y disponibilidad)
-│   │   ├── realtime/      (canales SSE de tiempo real y notificaciones)
-│   │   ├── validators/    (esquemas de validación con Zod)
-│   │   └── utils/         (funciones de ayuda, formato de moneda y fechas)
-│   ├── uploads/           (volumen persistente para imágenes PNG, fuera del repositorio)
-│   └── tests/             (batería de pruebas automatizadas)
-├── database/
-│   ├── migrations/        (migraciones SQL versionadas)
-│   ├── seeds/             (datos semilla para desarrollo)
-│   └── schema.sql         (esquema maestro relacional DDL)
-├── n8n/
-│   ├── workflows/         (flujos de trabajo exportados en JSON estándar)
-│   └── README.md          (documentación de webhooks y nodos n8n)
-├── scripts/
-│   ├── backup.sh          (script de respaldo automatizado diario)
-│   ├── restore.sh         (script de restauración de copias de seguridad)
-│   ├── backup.ps1         (script PowerShell de respaldo en Windows)
-│   └── restore.ps1        (script PowerShell de restauración en Windows)
-├── docs/                  (arquitectura, endpoints, seguridad, pruebas, créditos)
-├── docker-compose.yml     (orquestación de contenedores en red interna)
-├── .env.example           (plantilla de variables de entorno sin credenciales)
-├── .gitignore             (reglas estrictas de exclusión de secretos y temporales)
-└── README.md
+│       ├── lib/             (slots.js, time.js, money.js, auth.js, audit.js, firebase.js)
+│       └── services/        (citas, inventario, tratamientos, usuarios, panel, chatbot, n8n)
+├── frontend/                (Vite + React + React Router + lucide-react + firebase SDK)
+├── n8n/workflows/           (4 flujos exportados en JSON)
+├── scripts/seed.js          (datos iniciales idempotentes)
+├── tests/                   (unitarias slots.js, reglas Firestore e integración contra emuladores)
+└── docs/                    (arquitectura, decisiones técnicas, diseño de datos y créditos)
 ```
 
 ---
 
-## 4. Instalación y Ejecución
+## 3. Convenciones
 
-### Opción A: Despliegue con Docker Compose (Producción / Staging)
-Requisitos: Docker Engine y Docker Compose instalados.
-
-1. Clonar el repositorio y configurar el archivo de variables de entorno:
-   ```bash
-   cp .env.example .env
-   ```
-2. Levantar los contenedores en segundo plano:
-   ```bash
-   docker compose up -d --build
-   ```
-3. Verificar el estado de salud de los servicios:
-   ```bash
-   docker compose ps
-   ```
-4. Acceso a los servicios:
-   * **Frontend:** `http://localhost:3000`
-   * **Backend API:** `http://localhost:5000/api/health`
-   * **n8n:** `http://localhost:5678`
-
-### Opción B: Ejecución Local para Desarrollo
-Requisitos: Node.js v18+ y npm v9+.
-
-1. **Configurar el entorno:**
-   ```bash
-   copy .env.example .env
-   ```
-2. **Instalar dependencias del Backend:**
-   ```bash
-   cd backend
-   npm install
-   npm run start
-   ```
-   *El backend inicializará el servidor en el puerto 5000 (`http://localhost:5000`). Si MySQL no está disponible, utilizará el motor relacional local persistente.*
-
-3. **Instalar dependencias del Frontend:**
-   ```bash
-   cd ../frontend
-   npm install
-   npm run dev
-   ```
-   *El frontend quedará activo en `http://localhost:5173`.*
+- **Moneda:** Bolivianos (`Bs 0.00`), aritmética exacta en centavos enteros.
+- **Fechas:** guardadas como texto `AAAA-MM-DD`, mostradas como `DD/MM/AAAA`.
+- **Horas:** formato 24 h (`HH:mm`).
+- **Zona horaria:** `America/La_Paz` (UTC-4 fijo).
 
 ---
 
-## 5. Respaldos y Restauración (Módulo 18)
+## 4. Instalación y ejecución local
 
-### Ejecutar Respaldo Manual
-* En Linux / Docker:
-  ```bash
-  ./scripts/backup.sh
-  ```
-* En Windows (PowerShell):
-  ```powershell
-  .\scripts\backup.ps1
-  ```
-Los archivos de respaldo se generan en `./backups/` con compresión gzip (`db_estetica_db_YYYYMMDD_HHMMSS.sql.gz` y `uploads_YYYYMMDD_HHMMSS.tar.gz`) y metadatos en `last_backup.json`.
-
-### Restaurar Respaldo
 ```bash
-./scripts/restore.sh ./backups/db_estetica_db_20261113_093000.sql.gz
+npm run install:all
+cp functions/.env.example functions/.env   # editar claves si usas n8n
+npm --prefix frontend run build            # compila para Hosting local
+firebase emulators:start --import=./emulator-data --export-on-exit
+```
+
+En una segunda terminal (solo la primera vez, o para re-sembrar):
+
+```bash
+node scripts/seed.js
+npm --prefix frontend run dev              # http://localhost:5173
+```
+
+**Servicios locales:**
+- Frontend Dev (Vite): `http://localhost:5173`
+- Firebase Hosting local: `http://127.0.0.1:5000`
+- Emulator UI: `http://127.0.0.1:4000`
+- n8n (Docker): `http://localhost:5678`
+
+### Credenciales demo creadas por `scripts/seed.js`
+
+| Rol | Correo | Contraseña | Sucursal |
+|---|---|---|---|
+| `admin` | `admin@talitakumi.com` | `Admin123!` | Todas (4 sedes) |
+| `encargado` | `encargado.villafatima@talitakumi.com` | `Encargado123!` | Villa Fátima |
+| `encargado` | `encargado.upea@talitakumi.com` | `Encargado123!` | UPEA – El Alto |
+| `encargado` | `encargado.ceja@talitakumi.com` | `Encargado123!` | Ceja – El Alto |
+| `encargado` | `encargado.maxparedes@talitakumi.com` | `Encargado123!` | Max Paredes |
+| `cliente` | `cliente@talitakumi.com` | `Cliente123!` | — |
+
+---
+
+## 5. Pruebas automatizadas (Objetivo 5)
+
+```bash
+npm run test:unit          # Lógica pura: slots.js, sweep-line capacidad=2, cuotas exactas
+npm run test:rules         # @firebase/rules-unit-testing sobre firestore.rules
+npm run test:integration   # Concurrencia real, transferencias, pagos, auditoría, chatbot y n8nApi
+npm test                   # Ejecuta toda la suite completa
 ```
 
 ---
 
-## 6. Roles del Sistema
+## 6. Paso a producción
 
-* **Administrador General:** Jefes del centro con control total de las 4 sedes, precios, contenido de portada, versículos, usuarios y auditoría.
-* **Encargado de Sucursal:** Acceso exclusivo a su(s) sede(s) asignada(s) para gestionar reservas, cobros, tratamientos e inventario.
-* **Cliente:** Registro independiente para agendar citas, ver historial propio, saldos y chatear con el agente de IA.
-
----
-
-## 7. Justificación de Librerías
-
-* **React Router:** Enrutamiento SPA seguro y navegación declarativa por rol.
-* **Zod:** Validación estricta de esquemas de entrada para evitar inyección y datos inconsistentes.
-* **bcryptjs:** Cifrado unidireccional de contraseñas con salting.
-* **Multer + Sharp:** Subida segura de imágenes exclusivamente en formato PNG con validación de magic bytes y conversión automática a WebP.
-* **Helmet & CORS:** Cabeceras HTTP de protección y restricción de dominio cruzado.
-* **Lucide React:** Iconografía vectorial estilizada y accesible.
+1. Crear proyecto Firebase real (plan **Blaze** para Cloud Functions) y actualizar `.firebaserc`.
+2. Elegir ubicación de Firestore en `southamerica-east1`.
+3. Configurar `VITE_USE_EMULATORS=false` y las credenciales web en `frontend/.env`.
+4. Cargar secretos en Functions:
+   ```bash
+   firebase functions:secrets:set N8N_API_KEY
+   ```
+5. Publicar con `firebase deploy` y desplegar n8n en un servidor accesible por HTTPS público.

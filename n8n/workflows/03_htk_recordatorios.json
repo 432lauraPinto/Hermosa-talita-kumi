@@ -1,0 +1,64 @@
+{
+  "name": "HTK – Recordatorios",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * *"
+            }
+          ]
+        }
+      },
+      "id": "htk-rec-cron",
+      "name": "Cron Diario 18:00 (La Paz)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/citas-manana",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "htk-rec-get",
+      "name": "GET /citas-manana",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json || {};\nconst citas = Array.isArray(resp.citas) ? resp.citas : [];\nreturn citas.map((c) => {\n  const [y, m, d] = String(c.fecha || '').split('-');\n  const fechaBO = d && m && y ? `${d}/${m}/${y}` : c.fecha;\n  return {\n    json: {\n      citaId: c.id,\n      clienteNombre: c.clienteNombre,\n      clienteTelefono: c.clienteTelefono || '',\n      sucursalNombre: c.sucursalNombre,\n      mensajeRecordatorio: `Hola ${c.clienteNombre}, te recordamos tu cita mañana ${fechaBO} a las ${c.hora} para ${c.servicioNombre} en HERMOSA TALITA KUMI (${c.sucursalNombre}). Si necesitas reprogramar o cancelar, hazlo con al menos 2 horas de anticipación.`\n    }\n  };\n});"
+      },
+      "id": "htk-rec-build",
+      "name": "Generar Recordatorio por Cita",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Cron Diario 18:00 (La Paz)": {
+      "main": [[{ "node": "GET /citas-manana", "type": "main", "index": 0 }]]
+    },
+    "GET /citas-manana": {
+      "main": [[{ "node": "Generar Recordatorio por Cita", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "timezone": "America/La_Paz"
+  }
+}

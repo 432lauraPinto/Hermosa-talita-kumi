@@ -1,0 +1,295 @@
+{
+  "name": "HTK – Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "htk-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "htk-cb-webhook",
+      "name": "Webhook HTK Chatbot",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "htk-chatbot"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.mensaje }}",
+        "options": {
+          "systemMessage": "=Eres el asistente virtual oficial del centro estético HERMOSA TALITA KUMI en La Paz y El Alto, Bolivia.\n\nREGLAS OBLIGATORIAS:\n1. Responde siempre en español de Bolivia, con tono cálido, respetuoso y profesional.\n2. NUNCA inventes precios, horarios, direcciones ni promociones: consulta siempre las herramientas HTTP conectadas a Firebase (n8nApi).\n3. Muestra los precios siempre en Bolivianos con dos decimales (ej. Bs 150.00), fechas como DD/MM/AAAA y horas en formato 24 h (HH:mm).\n4. Estado de sesión del usuario actual: {{ $json.body.uid ? 'AUTENTICADO (puede consultar citas, reservar, cancelar y ver su saldo)' : 'INVITADO SIN SESIÓN' }}.\n5. Si el usuario NO ha iniciado sesión y pide reservar, cancelar o consultar sus citas o saldo, pídele amablemente que inicie sesión en la plataforma primero.\n6. Nunca permitas que un usuario consulte ni modifique datos de otra persona."
+        }
+      },
+      "id": "htk-cb-agent",
+      "name": "AI Agent HTK",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [540, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "htk-cb-llm",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [360, 560],
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI HTK"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook HTK Chatbot').item.json.body.sessionId || $('Webhook HTK Chatbot').item.json.body.uid || 'anon' }}",
+        "contextWindowLength": 8
+      },
+      "id": "htk-cb-memory",
+      "name": "Memoria Conversacional",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [520, 560]
+    },
+    {
+      "parameters": {
+        "name": "consultar_servicios",
+        "description": "Obtiene el catálogo oficial de servicios activos y precios en Bs desde Firebase.",
+        "method": "GET",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/servicios",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        }
+      },
+      "id": "htk-tool-servicios",
+      "name": "Tool: Servicios",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 560]
+    },
+    {
+      "parameters": {
+        "name": "consultar_sucursales",
+        "description": "Obtiene las 4 sucursales oficiales, direcciones, horarios y teléfonos WhatsApp.",
+        "method": "GET",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/sucursales",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        }
+      },
+      "id": "htk-tool-sucursales",
+      "name": "Tool: Sucursales",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [840, 560]
+    },
+    {
+      "parameters": {
+        "name": "consultar_disponibilidad",
+        "description": "Consulta horarios disponibles para una sucursalId, servicioId y fecha (AAAA-MM-DD).",
+        "method": "GET",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/disponibilidad?sucursalId={sucursalId}&servicioId={servicioId}&fecha={fecha}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            { "name": "sucursalId", "description": "ID de sucursal (villa-fatima, upea, ceja, max-paredes)", "type": "string" },
+            { "name": "servicioId", "description": "ID del servicio consultado previamente", "type": "string" },
+            { "name": "fecha", "description": "Fecha en formato AAAA-MM-DD", "type": "string" }
+          ]
+        }
+      },
+      "id": "htk-tool-disponibilidad",
+      "name": "Tool: Disponibilidad",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1000, 560]
+    },
+    {
+      "parameters": {
+        "name": "consultar_mis_citas",
+        "description": "Lista las citas del cliente autenticado actual. No pide clienteId al usuario.",
+        "method": "GET",
+        "url": "=http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/citas?clienteId={{ $('Webhook HTK Chatbot').item.json.body.uid || '' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        }
+      },
+      "id": "htk-tool-citas",
+      "name": "Tool: Mis Citas",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 720]
+    },
+    {
+      "parameters": {
+        "name": "reservar_cita",
+        "description": "Crea una reserva transaccional para el usuario autenticado actual.",
+        "method": "POST",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/citas",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"clienteId\": \"{{ $('Webhook HTK Chatbot').item.json.body.uid || '' }}\",\n  \"sucursalId\": \"{sucursalId}\",\n  \"servicioId\": \"{servicioId}\",\n  \"fecha\": \"{fecha}\",\n  \"hora\": \"{hora}\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            { "name": "sucursalId", "description": "ID de sucursal", "type": "string" },
+            { "name": "servicioId", "description": "ID de servicio", "type": "string" },
+            { "name": "fecha", "description": "Fecha AAAA-MM-DD", "type": "string" },
+            { "name": "hora", "description": "Hora HH:mm (24h)", "type": "string" }
+          ]
+        }
+      },
+      "id": "htk-tool-reservar",
+      "name": "Tool: Reservar Cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [840, 720]
+    },
+    {
+      "parameters": {
+        "name": "cancelar_cita",
+        "description": "Cancela una cita del usuario autenticado (requiere 2h o más de anticipación).",
+        "method": "POST",
+        "url": "http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/citas/cancelar",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"clienteId\": \"{{ $('Webhook HTK Chatbot').item.json.body.uid || '' }}\",\n  \"citaId\": \"{citaId}\",\n  \"motivo\": \"{motivo}\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            { "name": "citaId", "description": "ID de la cita a cancelar", "type": "string" },
+            { "name": "motivo", "description": "Motivo de cancelación", "type": "string" }
+          ]
+        }
+      },
+      "id": "htk-tool-cancelar",
+      "name": "Tool: Cancelar Cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1000, 720]
+    },
+    {
+      "parameters": {
+        "name": "consultar_mi_saldo",
+        "description": "Consulta tratamientos, cuotas y saldo pendiente del usuario autenticado actual.",
+        "method": "GET",
+        "url": "=http://host.docker.internal:5001/demo-hermosa-talita-kumi/southamerica-east1/n8nApi/saldo?clienteId={{ $('Webhook HTK Chatbot').item.json.body.uid || '' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "htk-demo-n8n-secret-key-2026"
+            }
+          ]
+        }
+      },
+      "id": "htk-tool-saldo",
+      "name": "Tool: Mi Saldo",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1160, 560]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"respuesta\": {{ JSON.stringify($json.output || '¿En qué puedo ayudarte hoy?') }}\n}",
+        "options": {}
+      },
+      "id": "htk-cb-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook HTK Chatbot": {
+      "main": [[{ "node": "AI Agent HTK", "type": "main", "index": 0 }]]
+    },
+    "AI Agent HTK": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent HTK", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Memoria Conversacional": {
+      "ai_memory": [[{ "node": "AI Agent HTK", "type": "ai_memory", "index": 0 }]]
+    },
+    "Tool: Servicios": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Sucursales": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Disponibilidad": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Mis Citas": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Reservar Cita": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Cancelar Cita": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    },
+    "Tool: Mi Saldo": {
+      "ai_tool": [[{ "node": "AI Agent HTK", "type": "ai_tool", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "timezone": "America/La_Paz"
+  }
+}

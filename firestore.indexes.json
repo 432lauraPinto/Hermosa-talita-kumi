@@ -1,0 +1,95 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "citas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sucursalId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "ASCENDING" },
+        { "fieldPath": "hora", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "citas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clienteId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "citas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clienteId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "citas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fecha", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "movimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sucursalId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "movimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sucursalId", "order": "ASCENDING" },
+        { "fieldPath": "productoId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tratamientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clienteId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tratamientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sucursalId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pagos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clienteId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pagos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sucursalId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pagos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tratamientoId", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
